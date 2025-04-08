@@ -12,30 +12,35 @@ import com.example.purrytify.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private var isLoggedIn = false // Changed from "lateinit var isLoggedIn: False" to "var isLoggedIn = false"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (isLoggedIn) {
-            // User is logged in, show main activity
-            binding = ActivityMainBinding.inflate(layoutInflater)
-            setContentView(binding.root)
+        // Check login status from SharedPreferences
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val isLoggedIn = prefs.getBoolean("is_logged_in", false)
+//        val isLoggedIn = false
 
-            // Set up navigation
-            val navView: BottomNavigationView = binding.navView
-            val navController = findNavController(R.id.nav_host_fragment_activity_main)
-            val appBarConfiguration = AppBarConfiguration(
-                setOf(
-                    R.id.navigation_home, R.id.navigation_library, R.id.navigation_profile
-                )
-            )
-            navView.setupWithNavController(navController)
-        } else {
-            // User is not logged in, redirect to login activity
+        if (!isLoggedIn) {
+            // If not logged in, redirect to LoginActivity
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
-            finish() // Close MainActivity so user can't go back with back button
+            finish() // Close MainActivity
+            return
         }
+
+        // User is logged in, set up the main UI
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val navView: BottomNavigationView = binding.navView
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        val appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.navigation_home, R.id.navigation_library, R.id.navigation_profile
+            )
+        )
+        navView.setupWithNavController(navController)
     }
+
 }

@@ -204,7 +204,7 @@
             <LinearLayout
                 android:id="@+id/llRecentlyPlayed"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_marginTop="16dp"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@+id/tvRecentlyPlayed">
@@ -423,6 +423,7 @@
                             android:textSize="14sp" />
                     </LinearLayout>
                 </LinearLayout>
+
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
