@@ -4,21 +4,31 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.purrytify.data.local.db.entities.SongEntity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.purrytify.databinding.ActivityMainBinding
 import com.example.purrytify.utils.MusicPlayerManager
 import kotlinx.coroutines.flow.collect
+import android.util.Log
+import android.widget.LinearLayout
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
+import com.example.purrytify.viewmodel.AlbumItemView
+import com.example.purrytify.viewmodel.MusicDbViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val musicPlayerManager = MusicPlayerManager.getInstance()
+    val musicPlayerManager = MusicPlayerManager.getInstance()
+    private val musicDbViewModel: MusicDbViewModel by viewModels()
+    val userSongs = MutableStateFlow<List<SongEntity>>(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,30 +53,88 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadInitialData() {
-        // Simulate loading initial data
-        // In a real app, this would likely involve database or network calls
-        val defaultSongs = listOf(
-            SongData(
-                id = 1,
-                title = "Tung Tung",
-                artist = "Artist Name",
-                albumArt = R.drawable.starboy_album,
-                audioResource = R.raw.tung_tung
-            ),
-            // Add more songs as needed
-        )
-
-        // You might want to store these in a repository or ViewModel
-        // For now, we'll just use the first song
-        val defaultSong = defaultSongs.firstOrNull()
-        defaultSong?.let { song ->
-            musicPlayerManager.loadSong(
-                this,
-                song.audioResource,
-                song.title,
-                song.artist,
-                song.albumArt
+        lifecycleScope.launch {
+            userSongs.value = listOf(
+                SongEntity(
+                    title = "Starboy",
+                    artist = "The Weeknd, Daft Punk",
+                    artworkURI = "android.resource://${packageName}/drawable/starboy_album",
+                    uri = "android.resource://${packageName}/raw/starboy",
+                    duration = 0
+                ),
+                SongEntity(
+                    title = "Kiss of Life",
+                    artist = "Sade",
+                    artworkURI = "android.resource://${packageName}/drawable/album_kiss_of_life",
+                    uri = "android.resource://${packageName}/raw/kiss_of_life",
+                    duration = 0
+                ),
+                SongEntity(
+                    title = "BEST INTEREST",
+                    artist = "Tyler, The Creator",
+                    artworkURI = "android.resource://${packageName}/drawable/album_best_interest",
+                    uri = "android.resource://${packageName}/raw/kiss_of_life",
+                    duration = 0
+                )
             )
+
+            // Seed the database first
+//            val seedSong = SongEntity(
+//                title = "Starboy",
+//                artist = "The Weeknd",
+//                artworkURI = "android.resource://${packageName}/drawable/starboy_album",
+//                uri = "android.resource://${packageName}/raw/starboy",
+//                duration = 0
+//            )
+            // musicDbViewModel.insertSong(seedSong, "13522042@std.stei.itb.ac.id")
+
+            musicPlayerManager.clearCurrentSong()
+
+            // Query to get songs from database according to user
+            musicDbViewModel.allSongs.collect { songs ->
+                val songsToLoad = if (songs.isEmpty()) {
+                    listOf(
+                        SongEntity(
+                            title = "Tung Tung",
+                            artist = "Artist Name",
+                            artworkURI = "android.resource://${packageName}/drawable/starboy_album",
+                            uri = "android.resource://${packageName}/raw/tung_tung",
+                            duration = 0
+                        )
+                    )
+                } else {
+                    // Ensure songs are SongEntity
+                    songs.map { song ->
+                        SongEntity(
+                            title = song.title,
+                            artist = song.artist,
+                            artworkURI = song.artworkURI ?: "",
+                            uri = song.uri,
+                            duration = song.duration
+                        )
+                    }
+                }
+
+                // Load the first song
+//                 val defaultSong = seedSong
+//                 defaultSong?.let { songEntity ->
+//                   musicPlayerManager.loadSong(this@MainActivity, songEntity)
+//                 }
+            }
+        }
+    }
+
+    private fun getDrawableResourceFromUri(uri: String): Int {
+        return try {
+            val resourceName = uri.substringAfterLast("/")
+            val drawableResourceId = resources.getIdentifier(
+                resourceName,
+                "drawable",
+                packageName
+            )
+            drawableResourceId.takeIf { it != 0 } ?: R.drawable.logo
+        } catch (e: Exception) {
+            R.drawable.logo
         }
     }
 
@@ -93,11 +161,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateMiniPlayerUI() {
         val currentSong = musicPlayerManager.currentSongInfo.value
-        currentSong?.let { song ->
-            // Update mini player UI elements
-            binding.miniPlayerSongTitle?.text = song.title
-            binding.miniPlayerArtistName?.text = song.artist
-            binding.miniPlayerAlbumCover?.setImageResource(song.artworkResId)
+        val currentDestination = findNavController(R.id.nav_host_fragment_activity_main).currentDestination?.id
+
+        // Check both conditions: if there's a song AND not on player screen
+        if (currentSong != null && currentDestination != R.id.navigation_track_view && currentDestination != R.id.navigation_profile) {
+            binding.miniPlayerSongTitle?.text = currentSong.title
+            binding.miniPlayerArtistName?.text = currentSong.artist
+            binding.miniPlayerAlbumCover?.setImageURI(currentSong.artworkURI.toUri())
+            toggleMiniPlayer(true)
+        } else {
+            toggleMiniPlayer(false)
         }
     }
 
@@ -106,10 +179,10 @@ class MainActivity : AppCompatActivity() {
         binding.playButton?.setOnClickListener {
             if (musicPlayerManager.isPlaying.value) {
                 musicPlayerManager.pause()
-                Toast.makeText(this, "Music paused", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this, "Music paused", Toast.LENGTH_SHORT).show()
             } else {
                 musicPlayerManager.play()
-                Toast.makeText(this, "Music playing", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this, "Music playing", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -129,7 +202,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_home,
                 R.id.navigation_library -> {
                     // Show mini player for these destinations
-                    toggleMiniPlayer(true)
+                    updateMiniPlayerUI()
                 }
                 R.id.navigation_track_view,
                 R.id.navigation_profile -> {

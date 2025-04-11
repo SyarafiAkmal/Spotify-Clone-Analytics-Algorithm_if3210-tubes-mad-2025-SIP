@@ -11,11 +11,3 @@ class HomeViewModel : ViewModel() {
     }
     val text: LiveData<String> = _text
 }
-
-data class Song(
-    val title: String,
-    val artist: String,
-    val duration: Long,
-    val uri: String,
-    val artworkUri: String
-)

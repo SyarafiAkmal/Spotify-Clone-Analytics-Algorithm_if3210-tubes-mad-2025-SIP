@@ -9,24 +9,24 @@ import androidx.lifecycle.viewModelScope
 import com.example.purrytify.data.local.db.AppDatabase
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.data.local.db.entities.SongUploader
-import com.example.purrytify.ui.home.Song
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
+import androidx.core.net.toUri
 
 class MusicDbViewModel(application: Application) : AndroidViewModel(application) {
     private val songDao = AppDatabase.Companion.getDatabase(application).songDao()
 
-    val allSongs: Flow<List<Song>> =
+    val allSongs: Flow<List<SongEntity>> =
         songDao.getSongsByUser("13522042@std.stei.itb.ac.id").map { entities ->
             entities.map { entity ->
-                Song(
+                SongEntity(
                     title = entity.title,
                     artist = entity.artist,
                     duration = entity.duration,
                     uri = entity.uri,
-                    artworkUri = entity.artworkURI ?: ""
+                    artworkURI = entity.artworkURI ?: ""
                 )
             }
         }
@@ -50,14 +50,14 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
     }
 
 
-    fun insertSong(song: Song, userEmail: String){
+    fun insertSong(song: SongEntity, userEmail: String){
         viewModelScope.launch {
             val entity = SongEntity(
                 title = song.title,
                 artist = song.artist,
                 duration = song.duration,
                 uri = song.uri,
-                artworkURI = song.artworkUri
+                artworkURI = song.artworkURI
             )
 
             val newId = songDao.insertSong(entity).toInt()
@@ -67,7 +67,7 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
 
     fun checkAndInsertSong(
         context: Context,
-        song: Song,
+        song: SongEntity,
         userEmail: String,
         onExists: () -> Unit
     ) {
@@ -85,14 +85,14 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
                 )
                 songDao.registerUserToSong(registerUploader.uploaderEmail, registerUploader.songId)
             } else {
-                val savedArtworkPath = extractAndSaveArtwork(context, Uri.parse(song.uri)) ?: ""
+                val savedArtworkPath = extractAndSaveArtwork(context, song.uri.toUri()) ?: ""
 
                 val entity = SongEntity(
                     title = song.title,
                     artist = song.artist,
                     duration = song.duration,
                     uri = song.uri,
-                    artworkURI = savedArtworkPath // 👈 pakai path lokal
+                    artworkURI = savedArtworkPath
                 )
                 val newId = songDao.insertSong(entity).toInt()
                 songDao.registerUserToSong(userEmail, newId)

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.MainActivity
@@ -48,7 +49,7 @@ class TrackViewFragment : Fragment() {
     private fun setupUI() {
         val currentSong = musicPlayerManager.currentSongInfo.value
         currentSong?.let { song ->
-            binding.albumCover.setImageResource(song.artworkResId)
+            binding.albumCover.setImageURI(song.artworkURI.toUri())
             binding.trackTitle.text = song.title
             binding.trackArtist.text = song.artist
         }
