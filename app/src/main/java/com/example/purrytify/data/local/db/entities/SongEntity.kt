@@ -11,7 +11,7 @@ data class SongEntity(
     ) val id: Int = 0,
     val title: String,
     val artist: String,
-    val artworkURI: String,
-    val uri: String,
+    val artworkURI: String, // path ke cover lagu @drawable/starboy
+    val uri: String, // path ke file mp3 di local storage
     val duration : Long
 )

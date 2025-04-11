@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.library.LibraryFragment">
+    tools:context=".ui.library.LibraryFragment"
+    android:paddingTop="15dp">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -35,14 +36,18 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageView
+                <ImageButton
+                    android:id="@+id/btnAddLibrary"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     android:layout_marginTop="5dp"
-                    android:layout_marginRight="20dp"
-                    android:src="@drawable/add_library"/>
+                    android:layout_marginEnd="20dp"
+                    android:src="@drawable/add_library"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="Add to library"
+                    android:padding="2dp"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -127,7 +132,7 @@
                         android:layout_height="50dp"
                         android:contentDescription="Jazz album"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/jazz" />
+                        android:src="@drawable/album_jazz_is_for_ordinary_people" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -170,7 +175,7 @@
                         android:layout_height="50dp"
                         android:contentDescription="Loose album"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/loose" />
+                        android:src="@drawable/album_loose" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -213,7 +218,7 @@
                         android:layout_height="50dp"
                         android:contentDescription="Nights album"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/nights" />
+                        android:src="@drawable/album_nights" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -255,7 +260,7 @@
                         android:layout_height="50dp"
                         android:contentDescription="Jazz album"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/jazz" />
+                        android:src="@drawable/album_jazz_is_for_ordinary_people" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -298,7 +303,7 @@
                         android:layout_height="50dp"
                         android:contentDescription="Loose album"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/loose" />
+                        android:src="@drawable/album_loose" />
 
                     <LinearLayout
                         android:layout_width="match_parent"

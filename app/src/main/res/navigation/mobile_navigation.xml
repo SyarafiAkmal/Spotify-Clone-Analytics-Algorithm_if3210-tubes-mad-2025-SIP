@@ -22,4 +22,9 @@
         android:name="com.example.purrytify.ui.profile.ProfileFragment"
         android:label=""
         tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/navigation_track_view"
+        android:name="com.example.purrytify.ui.trackview.TrackViewFragment"
+        android:label="Track View" />
 </navigation>

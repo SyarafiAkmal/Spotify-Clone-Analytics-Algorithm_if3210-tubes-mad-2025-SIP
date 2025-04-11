@@ -1,6 +1,7 @@
 package com.example.purrytify
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -52,11 +53,12 @@ class LoginActivity : AppCompatActivity() {
                 // Fetch user profile
                 val profile = ApiClient.api.getProfile("Bearer ${tokenResponse.accessToken}")
 
-                // Save profile data if needed
+                // Save profile data
                 prefs.edit {
                     putString("user_id", profile.id.toString())
                     putString("username", profile.username)
                     putString("email", profile.email)
+                    putString("profile_pict", profile.profilePhoto)
                 }
 
                 // Navigate to MainActivity

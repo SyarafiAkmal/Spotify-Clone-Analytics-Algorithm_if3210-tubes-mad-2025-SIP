@@ -1,15 +1,12 @@
 plugins {
-//    alias(libs.plugins.android.application)
-//    alias(libs.plugins.kotlin.android)
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.kapt")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    id("kotlin-kapt") // Required for Room
 }
 
 android {
     namespace = "com.example.purrytify"
-    compileSdk = 34
+    compileSdk = 34  // Keep at 34
 
     defaultConfig {
         applicationId = "com.example.purrytify"
@@ -39,22 +36,24 @@ android {
     }
     buildFeatures {
         viewBinding = true
-        compose = true
     }
 }
 
 dependencies {
-//    implementation ("com.google.android.material:material:1.11.0")
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
+    implementation("com.google.android.material:material:1.11.0")
+
+    // Use specific versions that work with compileSdk 34
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation(libs.material)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.androidx.legacy.support.v4)
-    implementation(libs.androidx.activity)
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")
+    implementation("androidx.activity:activity:1.8.2")  // Downgraded from 1.10.1
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -68,8 +67,13 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 
-    // database
-    implementation("androidx.room:room-runtime:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
-    kapt("androidx.room:room-compiler:2.6.1")
+    // Room Database
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    implementation("androidx.room:room-paging:$roomVersion")
+
+    // Testing Room
+    testImplementation("androidx.room:room-testing:$roomVersion")
 }

@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingTop="?attr/actionBarSize">
+    android:layout_height="match_parent">
 
     <fragment
         android:id="@+id/nav_host_fragment_activity_main"
@@ -39,62 +38,85 @@
 
             <!-- Mini Player -->
             <LinearLayout
+                android:id="@+id/miniPlayerContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="8dp"
                 app:layout_constraintBottom_toTopOf="@+id/mobile_navigation">
 
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/starboy"
-                    android:contentDescription="Currently playing album" />
-
+                <!-- Left Section (70%) -->
                 <LinearLayout
+                    android:id="@+id/miniPlayerClick"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_weight="7"
+                    android:orientation="horizontal"
+                    android:padding="8dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="Starboy"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp" />
+                    <ImageView
+                        android:id="@+id/miniPlayerAlbumCover"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/album_starboy"
+                        android:contentDescription="Currently playing album" />
 
-                    <TextView
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="The Weeknd"
-                        android:textColor="#B3B3B3"
-                        android:textSize="12sp" />
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/miniPlayerSongTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Starboy"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/miniPlayerArtistName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="The Weeknd"
+                            android:textColor="#B3B3B3"
+                            android:textSize="12sp" />
+                    </LinearLayout>
                 </LinearLayout>
 
-                <ImageButton
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="8dp"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/add_to_playlist"
-                    android:contentDescription="Add to playlist" />
+                <!-- Right Section (30%) -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="59dp"
+                    android:layout_weight="3"
+                    android:gravity="center_vertical|end"
+                    android:orientation="horizontal"
+                    android:paddingEnd="8dp">
 
-                <ImageButton
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="center_vertical"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/pause"
-                    android:contentDescription="Pause music" />
+                    <ImageButton
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="Add to playlist"
+                        android:src="@drawable/add_to_playlist" />
+
+                    <ImageButton
+                        android:id="@+id/playButton"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="Pause music"
+                        android:src="@drawable/pause" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
         <com.google.android.material.bottomnavigation.BottomNavigationView
