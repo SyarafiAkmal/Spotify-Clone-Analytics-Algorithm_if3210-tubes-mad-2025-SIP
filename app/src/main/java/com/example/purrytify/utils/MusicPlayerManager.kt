@@ -2,13 +2,18 @@ package com.example.purrytify.utils
 
 import android.content.Context
 import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import android.widget.Toast
 import com.example.purrytify.data.local.db.entities.SongEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import androidx.core.net.toUri
+import com.example.purrytify.MainActivity
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.map
 
 class MusicPlayerManager private constructor() {
     private var mediaPlayer: MediaPlayer? = null
@@ -17,6 +22,9 @@ class MusicPlayerManager private constructor() {
 
     private val _currentPosition = MutableStateFlow(0)
     val currentPosition: StateFlow<Int> = _currentPosition
+
+    private val _currentSongId = MutableStateFlow(0)
+    val currentSongId: StateFlow<Int> = _currentSongId
 
     private val _duration = MutableStateFlow(0)
     val duration: StateFlow<Int> = _duration
@@ -31,20 +39,22 @@ class MusicPlayerManager private constructor() {
         updateProgressTask = Runnable {
             mediaPlayer?.let {
                 _currentPosition.value = it.currentPosition
-                handler.postDelayed(updateProgressTask, 100) // Update every 100ms for smoother progress
+                handler.postDelayed(updateProgressTask, 100)
             }
         }
     }
 
     fun loadSong(context: Context, song: SongEntity) {
         try {
-            // Pause the current playback first (if any)
-            pause()
+            _currentSongId.value = song.id
 
-            // Create the new MediaPlayer before releasing the old one
+            if (context is MainActivity) {
+                context.updateRecentlyPlayedInHome(song)
+            }
+
+            pause()
             val newPlayer = MediaPlayer.create(context, song.uri.toUri())
 
-            // If new player was created successfully, release the old one
             if (newPlayer != null) {
                 mediaPlayer?.release()
                 mediaPlayer = newPlayer
@@ -59,14 +69,11 @@ class MusicPlayerManager private constructor() {
                     stopProgressTracking()
                 }
 
-                // Auto-play the new song (optional, remove if not desired)
                 play()
             } else {
-                // Log error or handle the case where MediaPlayer couldn't be created
                 println("Error: Could not create MediaPlayer for URI: ${song.uri}")
             }
         } catch (e: Exception) {
-            // Log the exception details for debugging
             println("Error loading song: ${e.message}")
             e.printStackTrace()
         }

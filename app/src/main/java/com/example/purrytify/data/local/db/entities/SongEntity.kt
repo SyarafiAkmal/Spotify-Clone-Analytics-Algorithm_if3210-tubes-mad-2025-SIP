@@ -6,9 +6,8 @@ import androidx.room.PrimaryKey
     tableName = "song_entity"
 )
 data class SongEntity(
-    @PrimaryKey(
-        autoGenerate = true
-    ) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val title: String,
     val artist: String,
     val artworkURI: String,

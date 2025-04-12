@@ -57,6 +57,13 @@ class TrackViewFragment : Fragment() {
 
     private fun observeMusicState() {
         lifecycleScope.launch {
+            musicPlayerManager.currentSongInfo.collect { song ->
+                if (song != null) {
+                    setupUI()
+                }
+            }
+        }
+        lifecycleScope.launch {
             musicPlayerManager.isPlaying.collect { isPlaying ->
                 updatePlayPauseButton(isPlaying)
             }
@@ -110,12 +117,22 @@ class TrackViewFragment : Fragment() {
 
         binding.btnPrevious.setOnClickListener {
             // Implement previous song logic
-            Toast.makeText(requireContext(), "Previous song", Toast.LENGTH_SHORT).show()
+            var mainActivity = (requireActivity() as MainActivity)
+            var userSongs = mainActivity.userSongs.value
+            var songId = musicPlayerManager.currentSongId.value
+            var newSongId = if (songId - 1 < 0) 0 else songId -1
+//            Toast.makeText(requireContext(), "${newSongId}", Toast.LENGTH_SHORT).show()
+            musicPlayerManager.loadSong(requireContext(), userSongs.get(newSongId))
         }
 
         binding.btnNext.setOnClickListener {
             // Implement next song logic
-            Toast.makeText(requireContext(), "Next song", Toast.LENGTH_SHORT).show()
+            var mainActivity = (requireActivity() as MainActivity)
+            var userSongs = mainActivity.userSongs.value
+            var songId = musicPlayerManager.currentSongId.value
+            var newSongId = (songId + 1) % userSongs.size
+//            Toast.makeText(requireContext(), "${newSongId}", Toast.LENGTH_SHORT).show()
+            musicPlayerManager.loadSong(requireContext(), userSongs.get(newSongId))
         }
 
         binding.btnFavorite.setOnClickListener {

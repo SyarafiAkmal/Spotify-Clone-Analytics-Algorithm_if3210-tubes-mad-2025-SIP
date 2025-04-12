@@ -62,4 +62,8 @@ class ProfileViewModel : ViewModel() {
             _error.value = "Missing profile data. Please log in again."
         }
     }
+
+    fun saveToDB() {
+
+    }
 }

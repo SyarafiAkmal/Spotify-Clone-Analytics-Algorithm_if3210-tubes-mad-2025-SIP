@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.purrytify.data.local.db.AppDatabase
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
 import androidx.core.net.toUri
+import com.example.purrytify.data.local.db.entities.RecentPlaysEntity
 
 class MusicDbViewModel(application: Application) : AndroidViewModel(application) {
     private val songDao = AppDatabase.Companion.getDatabase(application).songDao()
@@ -22,6 +24,7 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
         songDao.getSongsByUser("13522042@std.stei.itb.ac.id").map { entities ->
             entities.map { entity ->
                 SongEntity(
+                    id = entity.id,
                     title = entity.title,
                     artist = entity.artist,
                     duration = entity.duration,
@@ -30,6 +33,81 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
                 )
             }
         }
+
+    val recentSongs: Flow<List<SongEntity>> =
+        songDao.getRecentSongs("13522042@std.stei.itb.ac.id").map { entities ->
+            entities.map { entity ->
+                SongEntity(
+                    id = entity.id,
+                    title = entity.title,
+                    artist = entity.artist,
+                    duration = entity.duration,
+                    uri = entity.uri,
+                    artworkURI = entity.artworkURI ?: ""
+                )
+            }
+        }
+
+    val librarySongs: Flow<List<SongEntity>> =
+        songDao.getLibrarySongs("13522042@std.stei.itb.ac.id").map { entities ->
+            entities.map { entity ->
+                SongEntity(
+                    id = entity.id,
+                    title = entity.title,
+                    artist = entity.artist,
+                    duration = entity.duration,
+                    uri = entity.uri,
+                    artworkURI = entity.artworkURI ?: ""
+                )
+            }
+        }
+
+    val likedSongs: Flow<List<SongEntity>> =
+        songDao.getLikedSongs("13522042@std.stei.itb.ac.id").map { entities ->
+            entities.map { entity ->
+                SongEntity(
+                    id = entity.id,
+                    title = entity.title,
+                    artist = entity.artist,
+                    duration = entity.duration,
+                    uri = entity.uri,
+                    artworkURI = entity.artworkURI ?: ""
+                )
+            }
+        }
+
+    fun addRecentPlays(
+        songs: List<SongEntity>,
+        userEmail: String = "13522042@std.stei.itb.ac.id"
+    ) {
+        viewModelScope.launch {
+            try {
+                // Process each song
+                songs.forEach { song ->
+                    // First, get the song ID
+                    val songId = songDao.getSongId(song.title, song.artist)
+
+                    // Check if the recent play already exists
+                    val exists = songDao.isRecentPlayExists(userEmail, songId)
+
+                    if (!exists) {
+                        // Create and insert the recent play entry
+                        val recentPlay = RecentPlaysEntity(
+                            userEmail = userEmail,
+                            songId = songId
+                        )
+                        songDao.insertRecentPlay(recentPlay)
+
+                        Log.d("MusicDbViewModel", "Added recent play for song: ${song.title}")
+                    } else {
+                        Log.d("MusicDbViewModel", "Recent play already exists for song: ${song.title}")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("MusicDbViewModel", "Error adding recent plays", e)
+            }
+        }
+    }
 
     fun extractAndSaveArtwork(context: Context, uri: Uri): String? {
         val retriever = MediaMetadataRetriever()
@@ -59,9 +137,15 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
                 uri = song.uri,
                 artworkURI = song.artworkURI
             )
-
             val newId = songDao.insertSong(entity).toInt()
+            Log.d("MusicViewModel", "Inserted id:${newId}")
             songDao.registerUserToSong(userEmail, newId)
+        }
+    }
+
+    fun insertSongs(songs: List<SongEntity>, userEmail: String){
+        songs.forEach { song ->
+            insertSong(song, userEmail)
         }
     }
 
@@ -99,7 +183,5 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
-
-
 
 }

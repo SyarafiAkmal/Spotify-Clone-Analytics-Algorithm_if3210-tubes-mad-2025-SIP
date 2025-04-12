@@ -19,16 +19,23 @@ import android.util.Log
 import android.widget.LinearLayout
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
+import com.example.purrytify.ui.home.HomeFragment
 import com.example.purrytify.viewmodel.AlbumItemView
 import com.example.purrytify.viewmodel.MusicDbViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.purrytify.ui.home.HomeViewModel
+import com.example.purrytify.ui.library.LibraryViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     val musicPlayerManager = MusicPlayerManager.getInstance()
     private val musicDbViewModel: MusicDbViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by viewModels()
+    private val libraryViewModel: LibraryViewModel by viewModels()
     val userSongs = MutableStateFlow<List<SongEntity>>(emptyList())
+    val userLibrary = MutableStateFlow<List<SongEntity>>(emptyList())
+    val userLiked = MutableStateFlow<List<SongEntity>>(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,17 +51,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        // Load all necessary data
         loadInitialData()
-        setupMusicPlayer()
+        setContentView(binding.root)
         setupNavigationAndListeners()
+        setupMusicPlayer()
     }
 
     private fun loadInitialData() {
         lifecycleScope.launch {
-            userSongs.value = listOf(
+            val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+            val userEmail = "13522042@std.stei.itb.ac.id" // Your user email
+
+            Toast.makeText(this@MainActivity, "${prefs.getString("email", "none")}", Toast.LENGTH_SHORT).show()
+
+            val songsToInsert = listOf(
                 SongEntity(
                     title = "Starboy",
                     artist = "The Weeknd, Daft Punk",
@@ -73,73 +83,23 @@ class MainActivity : AppCompatActivity() {
                     title = "BEST INTEREST",
                     artist = "Tyler, The Creator",
                     artworkURI = "android.resource://${packageName}/drawable/album_best_interest",
-                    uri = "android.resource://${packageName}/raw/kiss_of_life",
+                    uri = "android.resource://${packageName}/raw/best_interest",
                     duration = 0
                 )
             )
 
-            // Seed the database first
-//            val seedSong = SongEntity(
-//                title = "Starboy",
-//                artist = "The Weeknd",
-//                artworkURI = "android.resource://${packageName}/drawable/starboy_album",
-//                uri = "android.resource://${packageName}/raw/starboy",
-//                duration = 0
-//            )
-            // musicDbViewModel.insertSong(seedSong, "13522042@std.stei.itb.ac.id")
+            // Insert each song
+//            musicDbViewModel.insertSongs(songsToInsert, userEmail)
 
             musicPlayerManager.clearCurrentSong()
-
-            // Query to get songs from database according to user
-            musicDbViewModel.allSongs.collect { songs ->
-                val songsToLoad = if (songs.isEmpty()) {
-                    listOf(
-                        SongEntity(
-                            title = "Tung Tung",
-                            artist = "Artist Name",
-                            artworkURI = "android.resource://${packageName}/drawable/starboy_album",
-                            uri = "android.resource://${packageName}/raw/tung_tung",
-                            duration = 0
-                        )
-                    )
-                } else {
-                    // Ensure songs are SongEntity
-                    songs.map { song ->
-                        SongEntity(
-                            title = song.title,
-                            artist = song.artist,
-                            artworkURI = song.artworkURI ?: "",
-                            uri = song.uri,
-                            duration = song.duration
-                        )
-                    }
-                }
-
-                // Load the first song
-//                 val defaultSong = seedSong
-//                 defaultSong?.let { songEntity ->
-//                   musicPlayerManager.loadSong(this@MainActivity, songEntity)
-//                 }
-            }
         }
     }
 
-    private fun getDrawableResourceFromUri(uri: String): Int {
-        return try {
-            val resourceName = uri.substringAfterLast("/")
-            val drawableResourceId = resources.getIdentifier(
-                resourceName,
-                "drawable",
-                packageName
-            )
-            drawableResourceId.takeIf { it != 0 } ?: R.drawable.logo
-        } catch (e: Exception) {
-            R.drawable.logo
-        }
+    fun updateRecentlyPlayedInHome(song: SongEntity) {
+        homeViewModel.addToRecentPlayed(song)
     }
 
     private fun setupMusicPlayer() {
-        // Observe playback state changes
         lifecycleScope.launch {
             musicPlayerManager.isPlaying.collect { isPlaying ->
                 updatePlayButtonIcon(isPlaying)
@@ -147,7 +107,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Optional: Observe current song changes
         lifecycleScope.launch {
             musicPlayerManager.currentSongInfo.collect { songInfo ->
                 updateMiniPlayerUI()
@@ -163,7 +122,6 @@ class MainActivity : AppCompatActivity() {
         val currentSong = musicPlayerManager.currentSongInfo.value
         val currentDestination = findNavController(R.id.nav_host_fragment_activity_main).currentDestination?.id
 
-        // Check both conditions: if there's a song AND not on player screen
         if (currentSong != null && currentDestination != R.id.navigation_track_view && currentDestination != R.id.navigation_profile) {
             binding.miniPlayerSongTitle?.text = currentSong.title
             binding.miniPlayerArtistName?.text = currentSong.artist
@@ -175,44 +133,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNavigationAndListeners() {
-        // Set up play/pause button
         binding.playButton?.setOnClickListener {
             if (musicPlayerManager.isPlaying.value) {
                 musicPlayerManager.pause()
-//                Toast.makeText(this, "Music paused", Toast.LENGTH_SHORT).show()
             } else {
                 musicPlayerManager.play()
-//                Toast.makeText(this, "Music playing", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Set up mini player click
         binding.miniPlayerClick?.setOnClickListener {
             val navController = findNavController(R.id.nav_host_fragment_activity_main)
             navController.navigate(R.id.navigation_track_view)
         }
 
-        // Set up bottom navigation
         val navView: BottomNavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
-
-        // Add destination change listener for mini player visibility
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.navigation_home,
                 R.id.navigation_library -> {
-                    // Show mini player for these destinations
                     updateMiniPlayerUI()
                 }
                 R.id.navigation_track_view,
                 R.id.navigation_profile -> {
-                    // Hide mini player for track view
                     toggleMiniPlayer(false)
                 }
             }
         }
 
-        // Setup bottom navigation with NavController
         navView.setupWithNavController(navController)
     }
 
@@ -222,12 +170,18 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    // Data class to represent song information
-    data class SongData(
-        val id: Int,
-        val title: String,
-        val artist: String,
-        val albumArt: Int,
-        val audioResource: Int
-    )
+    //    private fun getDrawableResourceFromUri(songUri: String): Int {
+//        return try {
+//            val resourceName = songUri.substringAfterLast("/")
+//            val drawableResourceId = resources.getIdentifier(
+//                resourceName,
+//                "drawable",
+//                packageName
+//            )
+//            drawableResourceId.takeIf { it != 0 } ?: R.drawable.logo
+//        } catch (e: Exception) {
+//            R.drawable.logo
+//        }
+//    }
+
 }
