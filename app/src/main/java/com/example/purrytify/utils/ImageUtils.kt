@@ -8,23 +8,13 @@ import android.widget.ImageView
 import com.example.purrytify.R
 import java.io.File
 
-/**
- * Helper class for handling image loading from different sources
- */
+
 object ImageUtils {
     private const val TAG = "ImageUtils"
 
-    /**
-     * Enhanced version of getDrawableResourceFromUri that handles both resource images
-     * and file-based images. For file-based images, it sets the bitmap directly on the ImageView.
-     *
-     * @param context The context
-     * @param uri The URI string (can be drawable reference, custom:filename, or file:// path)
-     * @param imageView The ImageView to set the image on for file-based images
-     * @return Resource ID (for drawable resources) or default resource ID (for file-based images)
-     */
     fun loadImage(context: Context, uri: String, imageView: ImageView?): Int {
         val defaultResourceId = R.drawable.logo
+        imageView?.setImageDrawable(null)
 
         try {
             // Case 1: Custom artwork reference (custom_artwork:timestamp)

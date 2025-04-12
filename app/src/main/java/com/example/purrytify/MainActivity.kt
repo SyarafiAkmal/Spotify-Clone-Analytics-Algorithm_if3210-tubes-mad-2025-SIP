@@ -25,6 +25,7 @@ import com.example.purrytify.viewmodel.MusicDbViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.purrytify.ui.home.HomeViewModel
 import com.example.purrytify.ui.library.LibraryViewModel
+import com.example.purrytify.utils.ImageUtils
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         loadInitialData()
+        setupLibraryObservation()
         setContentView(binding.root)
         setupNavigationAndListeners()
         setupMusicPlayer()
@@ -95,6 +97,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     fun updateRecentlyPlayedInHome(song: SongEntity) {
         homeViewModel.addToRecentPlayed(song)
     }
@@ -125,7 +128,14 @@ class MainActivity : AppCompatActivity() {
         if (currentSong != null && currentDestination != R.id.navigation_track_view && currentDestination != R.id.navigation_profile) {
             binding.miniPlayerSongTitle?.text = currentSong.title
             binding.miniPlayerArtistName?.text = currentSong.artist
-            binding.miniPlayerAlbumCover?.setImageURI(currentSong.artworkURI.toUri())
+
+            val resId = ImageUtils.loadImage(
+                this,
+                currentSong.artworkURI,
+                binding.miniPlayerAlbumCover
+            )
+            binding.miniPlayerAlbumCover.setImageResource(resId)
+
             toggleMiniPlayer(true)
         } else {
             toggleMiniPlayer(false)
@@ -138,6 +148,23 @@ class MainActivity : AppCompatActivity() {
                 musicPlayerManager.pause()
             } else {
                 musicPlayerManager.play()
+            }
+        }
+
+        binding.addToLibrary?.setOnClickListener {
+            val currentSong = musicPlayerManager.currentSongInfo.value
+            currentSong?.let { song ->
+                // Convert MusicPlayerManager's current song to SongEntity if needed
+                val songEntity = SongEntity(
+                    title = song.title,
+                    artist = song.artist,
+                    artworkURI = song.artworkURI,
+                    uri = song.uri,
+                    duration = song.duration
+                )
+
+                // Add to library
+                addSongToLibrary(songEntity)
             }
         }
 
@@ -168,6 +195,47 @@ class MainActivity : AppCompatActivity() {
         binding.playButton?.setImageResource(
             if (isPlaying) R.drawable.pause else R.drawable.play
         )
+    }
+
+    private fun addSongToLibrary(song: SongEntity) {
+        // Check if song is already in library to prevent duplicates
+        lifecycleScope.launch {
+            val isAlreadyInLibrary = userLibrary.value.any { it.title == song.title && it.artist == song.artist }
+
+            if (!isAlreadyInLibrary) {
+                // Insert the song into the library
+                libraryViewModel.addSongToUserLibrary(song)
+
+                // Show a toast to notify the user
+                Toast.makeText(
+                    this@MainActivity,
+                    "Added ${song.title} to Library",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                // Optionally show a different toast if song is already in library
+                Toast.makeText(
+                    this@MainActivity,
+                    "${song.title} is already in your Library",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun observeLibraryChanges() {
+        lifecycleScope.launch {
+            libraryViewModel.userLibrary.collect { library ->
+                userLibrary.value = library
+                Log.d("MainActivity", "Library updated: ${library.size} songs")
+            }
+        }
+    }
+
+    // Call this in onCreate after initializing viewModels
+    private fun setupLibraryObservation() {
+        libraryViewModel.initData()
+        observeLibraryChanges()
     }
 
     //    private fun getDrawableResourceFromUri(songUri: String): Int {

@@ -102,6 +102,7 @@
                     android:paddingEnd="8dp">
 
                     <ImageButton
+                        android:id="@+id/addToLibrary"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:layout_marginEnd="8dp"

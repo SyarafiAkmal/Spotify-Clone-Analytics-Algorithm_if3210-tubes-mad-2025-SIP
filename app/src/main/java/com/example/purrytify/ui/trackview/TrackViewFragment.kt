@@ -6,19 +6,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.Toast
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.example.purrytify.MainActivity
 import com.example.purrytify.R
-import com.example.purrytify.databinding.FragmentTrackViewBinding  // Add this import
+import com.example.purrytify.data.local.db.entities.SongEntity
+import com.example.purrytify.databinding.FragmentTrackViewBinding
+import com.example.purrytify.ui.home.HomeViewModel
+import com.example.purrytify.utils.ImageUtils
 import com.example.purrytify.utils.MusicPlayerManager
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class TrackViewFragment : Fragment() {
     private lateinit var binding: FragmentTrackViewBinding
     private val musicPlayerManager = MusicPlayerManager.getInstance()
     private var userIsSeeking = false
+    private lateinit var homeViewModel: HomeViewModel
+    private val allSongs = MutableStateFlow<List<SongEntity>>(emptyList())
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,17 +31,35 @@ class TrackViewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentTrackViewBinding.inflate(inflater, container, false)
+        homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Load songs from HomeViewModel
+        loadSongs()
+
         setupUI()
         setupBackButton()
         observeMusicState()
         setupSeekBar()
         setupPlaybackControls()
+    }
+
+    private fun loadSongs() {
+        // Use HomeViewModel to get songs instead of MainActivity
+        viewLifecycleOwner.lifecycleScope.launch {
+            homeViewModel.userAllSongs.collect { songs ->
+                if (songs.isNotEmpty()) {
+                    allSongs.value = songs
+//                    songs.forEach { song ->
+//                        Toast.makeText(requireActivity(), "id:${song.id}", Toast.LENGTH_SHORT).show()
+//                    }
+                }
+            }
+        }
     }
 
     private fun setupBackButton() {
@@ -49,7 +72,15 @@ class TrackViewFragment : Fragment() {
     private fun setupUI() {
         val currentSong = musicPlayerManager.currentSongInfo.value
         currentSong?.let { song ->
-            binding.albumCover.setImageURI(song.artworkURI.toUri())
+            // Use ImageUtils instead of directly setting URI
+            Toast.makeText(requireActivity(), "${song.title}", Toast.LENGTH_SHORT).show()
+            val albumResId = ImageUtils.loadImage(
+                requireContext(),
+                song.artworkURI,
+                binding.albumCover
+            )
+
+            binding.albumCover.setImageResource(albumResId)
             binding.trackTitle.text = song.title
             binding.trackArtist.text = song.artist
         }
@@ -117,22 +148,18 @@ class TrackViewFragment : Fragment() {
 
         binding.btnPrevious.setOnClickListener {
             // Implement previous song logic
-            var mainActivity = (requireActivity() as MainActivity)
-            var userSongs = mainActivity.userSongs.value
-            var songId = musicPlayerManager.currentSongId.value
+            var songId = musicPlayerManager.currentSongId.value - 1
             var newSongId = if (songId - 1 < 0) 0 else songId -1
-//            Toast.makeText(requireContext(), "${newSongId}", Toast.LENGTH_SHORT).show()
-            musicPlayerManager.loadSong(requireContext(), userSongs.get(newSongId))
+            Toast.makeText(requireContext(), "${newSongId}", Toast.LENGTH_SHORT).show()
+            musicPlayerManager.loadSong(requireContext(), allSongs.value.get(newSongId))
         }
 
         binding.btnNext.setOnClickListener {
             // Implement next song logic
-            var mainActivity = (requireActivity() as MainActivity)
-            var userSongs = mainActivity.userSongs.value
-            var songId = musicPlayerManager.currentSongId.value
-            var newSongId = (songId + 1) % userSongs.size
-//            Toast.makeText(requireContext(), "${newSongId}", Toast.LENGTH_SHORT).show()
-            musicPlayerManager.loadSong(requireContext(), userSongs.get(newSongId))
+            var songId = musicPlayerManager.currentSongId.value - 1
+            var newSongId = (songId + 1) % allSongs.value.size
+            Toast.makeText(requireContext(), "${newSongId}", Toast.LENGTH_SHORT).show()
+            musicPlayerManager.loadSong(requireContext(), allSongs.value.get(newSongId))
         }
 
         binding.btnFavorite.setOnClickListener {
@@ -171,7 +198,5 @@ class TrackViewFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Note: We don't release the MediaPlayer here
-        // as we want it to continue playing across activities
     }
 }

@@ -59,6 +59,32 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun addSongToUserLibrary(song: SongEntity) {
+        viewModelScope.launch {
+            try {
+                // Check if the song already exists in the library
+                val isAlreadyInLibrary = _userLibrary.value.any {
+                    it.title == song.title && it.artist == song.artist
+                }
+
+                if (!isAlreadyInLibrary) {
+                    // Insert the song to the user's library
+                    musicDbViewModel.insertSong(song, "13522042@std.stei.itb.ac.id")
+
+                    // Refresh library data
+                    initData()
+
+                    Log.d("LibraryViewModel", "Added song to user library: ${song.title}")
+                } else {
+                    Log.d("LibraryViewModel", "Song already exists in user library: ${song.title}")
+                }
+            } catch (e: Exception) {
+                Log.e("LibraryViewModel", "Error adding song to user library", e)
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun insertSong(song: SongEntity) {
         viewModelScope.launch {
             // Use your existing method to insert song
