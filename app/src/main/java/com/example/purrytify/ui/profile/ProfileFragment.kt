@@ -1,18 +1,23 @@
 package com.example.purrytify.ui.profile
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
-import androidx.core.view.isVisible
+import androidx.annotation.RequiresPermission
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.purrytify.LoginActivity
+import com.example.purrytify.R
 import com.example.purrytify.databinding.FragmentProfileBinding
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import androidx.core.view.isVisible
 
 class ProfileFragment : Fragment() {
 
@@ -20,6 +25,7 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var viewModel: ProfileViewModel
+    private var noConnectionView: View? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,17 +40,48 @@ class ProfileFragment : Fragment() {
         return binding.root
     }
 
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Check network connectivity first
+        checkNetworkAndLoadProfile()
 
         // Set up observers
         setupObservers()
 
-        // Load data
-        loadProfileData()
-
         // Set up button click listeners
         setupClickListeners()
+    }
+
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    private fun checkNetworkAndLoadProfile() {
+        try {
+            val isConnected = isNetworkAvailable(requireContext())
+            if (isConnected) {
+                // Show main content, hide no connection layout
+                binding.mainContentLayout.visibility = View.VISIBLE
+                binding.noConnectionLayout.visibility = View.GONE
+
+                // Load profile data
+                loadProfileData()
+            } else {
+                // Hide main content, show no connection layout
+                binding.mainContentLayout.visibility = View.GONE
+                binding.noConnectionLayout.visibility = View.VISIBLE
+            }
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Error checking network: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupObservers() {
@@ -105,14 +142,6 @@ class ProfileFragment : Fragment() {
             requireActivity().finish()
         }
 
-        // Edit profile button
-//        binding.btnEditProfile?.setOnClickListener {
-//            // Handle edit profile
-//            Toast.makeText(requireContext(), "Edit Profile clicked", Toast.LENGTH_SHORT).show()
-//            // Navigate to edit profile screen if needed
-//            // findNavController().navigate(R.id.action_profileFragment_to_editProfileFragment)
-//        }
-
         binding.btnEditProfile?.setOnClickListener {
             Toast.makeText(requireContext(), "Tombol edit dipencet", Toast.LENGTH_SHORT).show()
         }
@@ -121,5 +150,6 @@ class ProfileFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        noConnectionView = null
     }
 }
