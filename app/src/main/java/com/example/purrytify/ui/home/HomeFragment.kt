@@ -1,10 +1,13 @@
 package com.example.purrytify.ui.home
 
+import android.graphics.Color
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
 import androidx.fragment.app.Fragment
@@ -49,6 +52,8 @@ class HomeFragment : Fragment() {
             homeViewModel.userAllSongs.collect { songs ->
                 if (songs.isNotEmpty()) {
                     injectNewSongs(songs)
+                } else {
+                    showEmptyState("You have no songs yet")
                 }
             }
         }
@@ -160,13 +165,36 @@ class HomeFragment : Fragment() {
                     }
                     .start()
 
-                Toast.makeText(requireContext(), "id:${libraryView.getSong()?.id}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "id:${song.id}", Toast.LENGTH_SHORT).show()
                 (requireActivity() as MainActivity).musicPlayerManager.loadSong(requireContext(), libraryView.getSong()!!)
                 (requireActivity() as MainActivity).musicPlayerManager.play()
             }
 
             recentlyPlayedPlaceholder.addView(libraryView)
         }
+    }
+
+    private fun showEmptyState(message: String) {
+        val emptySongsPlaceholder: LinearLayout = binding.emptySongsPlaceholder
+//        val recentSongsPlaceholder: LinearLayout = binding.llRecentlyPlayed
+        emptySongsPlaceholder.removeAllViews()
+
+        // Create and add an empty state view
+        val emptyStateView = TextView(requireContext()).apply {
+            text = message
+            textSize = 20f
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                leftMargin = resources.getDimensionPixelSize(R.dimen.margin_large)
+            }
+        }
+
+        emptySongsPlaceholder.addView(emptyStateView)
+//        recentSongsPlaceholder.addView(emptyStateView)
     }
 
     override fun onDestroyView() {

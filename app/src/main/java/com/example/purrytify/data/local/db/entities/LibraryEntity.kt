@@ -3,11 +3,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 
-enum class LibraryStatus(val value: String) {
-    LIKE("like"),
-    LIBRARY("library"),
-    LISTENED("listened")
-}
+//enum class LibraryStatus(val value: String) {
+//    LIKE("like"),
+//    LIBRARY("library"),
+//    LISTENED("listened")
+//}
 
 @Entity(
     tableName = "library_entity",
@@ -16,5 +16,5 @@ enum class LibraryStatus(val value: String) {
 data class LibraryEntity(
     val songId: Int,
     val userEmail: String,
-    val libraryStatus: LibraryStatus
+    val libraryStatus: String
 )

@@ -42,7 +42,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             // Add the new song at the beginning of the list
             add(0, song)
         }
-        musicDbViewModel.addRecentPlays(_userRecentPlayed.value, "13522042@std.stei.itb.ac.id")
+        musicDbViewModel.addRecentPlays(_userRecentPlayed.value)
     }
 
     fun initData() {

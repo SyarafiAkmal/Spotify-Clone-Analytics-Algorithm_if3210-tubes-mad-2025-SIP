@@ -60,9 +60,6 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error initializing data", e)
                 e.printStackTrace()
-
-                // Error handling
-
             }
         }
     }
@@ -95,7 +92,7 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
     fun insertSong(song: SongEntity) {
         viewModelScope.launch {
             // Use your existing method to insert song
-            musicDbViewModel.insertSong(song, "13522042@std.stei.itb.ac.id")
+            musicDbViewModel.checkAndInsertSong(song)
 
             // Refresh library data
             initData()

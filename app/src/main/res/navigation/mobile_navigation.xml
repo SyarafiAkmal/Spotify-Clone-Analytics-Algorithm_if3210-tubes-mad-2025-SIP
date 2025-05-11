@@ -25,6 +25,6 @@
 
     <fragment
         android:id="@+id/navigation_track_view"
-        android:name="com.example.purrytify.ui.dialog_fragment.TrackViewFragment"
+        android:name="com.example.purrytify.ui.dialog.TrackViewFragment"
         android:label="Track View" />
 </navigation>

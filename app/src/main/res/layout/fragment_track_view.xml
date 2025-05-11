@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.dialog_fragment.TrackViewFragment">
+    tools:context=".ui.dialog.TrackViewDialogFragment">
 
     <!-- Linear gradient background -->
     <View
@@ -63,7 +63,7 @@
         android:layout_height="0dp"
         android:src="@drawable/starboy_album"
         android:scaleType="centerCrop"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent"

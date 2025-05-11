@@ -90,6 +90,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
     fun updateRecentlyPlayedInHome(song: SongEntity) {
         homeViewModel.addToRecentPlayed(song)
     }
@@ -171,7 +172,10 @@ class MainActivity : AppCompatActivity() {
             when (destination.id) {
                 R.id.navigation_home,
                 R.id.navigation_library -> {
-                    updateMiniPlayerUI()
+//                    updateMiniPlayerUI()
+                    if(musicPlayerManager.isPlaying.value){
+                        toggleMiniPlayer(true)
+                    }
                 }
                 R.id.navigation_profile -> {
                     toggleMiniPlayer(false)
