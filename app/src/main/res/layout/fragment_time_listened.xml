@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212">
+
+    <!-- Date and Title -->
+    <TextView
+        android:id="@+id/dateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="April 2025"
+        android:textColor="#AAAAAA"
+        android:textSize="14sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"/>
+
+    <!-- Listening Time Info -->
+    <TextView
+        android:id="@+id/listenTimeText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="You listened to music for"
+        android:textColor="#FFFFFF"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/dateText"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"/>
+
+    <TextView
+        android:id="@+id/minutesText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="862 minutes"
+        android:textColor="#00FF88"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/listenTimeText"
+        tools:layout_editor_absoluteY="96dp" />
+
+    <!-- Daily Average -->
+
+    <TextView
+        android:id="@+id/thisMonthText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="this month."
+        android:textColor="#FFFFFF"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteX="193dp"
+        tools:layout_editor_absoluteY="96dp" />
+
+    <TextView
+        android:id="@+id/dailyAverageText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Daily average: 33 min"
+        android:textColor="#AAAAAA"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/thisMonthText"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"/>
+
+    <!-- Graph Placeholder -->
+    <FrameLayout
+        android:id="@+id/chartContainer"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:background="#1E1E1E"
+        app:layout_constraintTop_toBottomOf="@id/dailyAverageText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Daily Chart"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:layout_gravity="center"/>
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
