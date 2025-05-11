@@ -20,19 +20,162 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <!-- Charts Section -->
+            <TextView
+                android:id="@+id/tvCharts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="0dp"
+                android:text="Charts"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Charts Horizontal Scroll -->
+            <HorizontalScrollView
+                android:id="@+id/hsvCharts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:scrollbars="none"
+                app:layout_constraintTop_toBottomOf="@+id/tvCharts">
+
+                <LinearLayout
+                    android:id="@+id/chartsContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp">
+
+                    <!-- Top 50 Global -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:orientation="vertical">
+
+                        <FrameLayout
+                            android:layout_width="100dp"
+                            android:layout_height="100dp">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@drawable/chart_background_gradient_blue"
+                                android:contentDescription="Top 50 Global"
+                                android:scaleType="centerCrop" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:layout_marginTop="16dp"
+                                android:textColor="#FFFFFF"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:layout_marginTop="46dp"
+                                android:textColor="#FFFFFF"
+                                android:textSize="12sp" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Your daily update of"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="the most played tracks"
+                            android:textColor="#B3B3B3"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- Top 50 Indonesia -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <FrameLayout
+                            android:layout_width="100dp"
+                            android:layout_height="100dp">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@drawable/chart_background_gradient_red"
+                                android:scaleType="centerCrop" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:layout_marginTop="16dp"
+                                android:textColor="#FFFFFF"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:layout_marginTop="46dp"
+                                android:textColor="#FFFFFF"
+                                android:textSize="12sp" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Your daily update of"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="the most played tracks"
+                            android:textColor="#B3B3B3"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </HorizontalScrollView>
+
             <!-- New Songs Section -->
             <TextView
                 android:id="@+id/tvNewSongs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="0dp"
+                android:layout_marginTop="32dp"
                 android:text="New Songs"
                 android:textColor="#FFFFFF"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/hsvCharts" />
 
             <!-- New Songs Horizontal Scroll -->
             <HorizontalScrollView
@@ -61,140 +204,6 @@
                         android:gravity="center">
 
                     </LinearLayout>
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_marginEnd="16dp"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <ImageView-->
-<!--                            android:layout_width="120dp"-->
-<!--                            android:layout_height="120dp"-->
-<!--                            android:contentDescription="Starboy album"-->
-<!--                            android:scaleType="centerCrop"-->
-<!--                            android:src="@drawable/album_starboy" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_marginTop="8dp"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Starboy"-->
-<!--                            android:textColor="#FFFFFF"-->
-<!--                            android:textSize="14sp" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="The Weeknd"-->
-<!--                            android:textColor="#B3B3B3"-->
-<!--                            android:textSize="12sp" />-->
-<!--                    </LinearLayout>-->
-
-<!--                    &lt;!&ndash; Here Comes The Sun &ndash;&gt;-->
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_marginEnd="16dp"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <ImageView-->
-<!--                            android:layout_width="120dp"-->
-<!--                            android:layout_height="120dp"-->
-<!--                            android:contentDescription="Beatles album"-->
-<!--                            android:scaleType="centerCrop"-->
-<!--                            android:src="@drawable/album_beatles" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_marginTop="8dp"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Here Comes T..."-->
-<!--                            android:textColor="#FFFFFF"-->
-<!--                            android:textSize="14sp" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="The Beatles"-->
-<!--                            android:textColor="#B3B3B3"-->
-<!--                            android:textSize="12sp" />-->
-<!--                    </LinearLayout>-->
-
-<!--                    &lt;!&ndash; Midnight Pretenders &ndash;&gt;-->
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_marginEnd="16dp"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <ImageView-->
-<!--                            android:layout_width="120dp"-->
-<!--                            android:layout_height="120dp"-->
-<!--                            android:contentDescription="Midnight Pretenders album"-->
-<!--                            android:scaleType="centerCrop"-->
-<!--                            android:src="@drawable/album_midnight" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_marginTop="8dp"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Midnight Pret..."-->
-<!--                            android:textColor="#FFFFFF"-->
-<!--                            android:textSize="14sp" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Tomoko Aran"-->
-<!--                            android:textColor="#B3B3B3"-->
-<!--                            android:textSize="12sp" />-->
-<!--                    </LinearLayout>-->
-
-<!--                    &lt;!&ndash; Violent Waves &ndash;&gt;-->
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <ImageView-->
-<!--                            android:layout_width="120dp"-->
-<!--                            android:layout_height="120dp"-->
-<!--                            android:contentDescription="Violent Waves album"-->
-<!--                            android:scaleType="centerCrop"-->
-<!--                            android:src="@drawable/album_violent" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_marginTop="8dp"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Violen..."-->
-<!--                            android:textColor="#FFFFFF"-->
-<!--                            android:textSize="14sp" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Kanye West"-->
-<!--                            android:textColor="#B3B3B3"-->
-<!--                            android:textSize="12sp" />-->
-<!--                    </LinearLayout>-->
                 </LinearLayout>
             </HorizontalScrollView>
 
@@ -220,221 +229,6 @@
                 android:layout_marginTop="16dp"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@+id/tvRecentlyPlayed">
-
-                <!-- Jazz is for ordinary people -->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="16dp"-->
-<!--                    android:layout_marginEnd="16dp"-->
-<!--                    android:layout_marginBottom="16dp"-->
-<!--                    android:orientation="horizontal">-->
-
-<!--                    <ImageView-->
-<!--                        android:layout_width="50dp"-->
-<!--                        android:layout_height="50dp"-->
-<!--                        android:contentDescription="Jazz album"-->
-<!--                        android:scaleType="centerCrop"-->
-<!--                        android:src="@drawable/album_jazz_is_for_ordinary_people" />-->
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_gravity="center_vertical"-->
-<!--                        android:layout_marginStart="16dp"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Jazz is for ordinary people"-->
-<!--                            android:textColor="#FFFFFF"-->
-<!--                            android:textSize="16sp" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="berlioz"-->
-<!--                            android:textColor="#B3B3B3"-->
-<!--                            android:textSize="14sp" />-->
-<!--                    </LinearLayout>-->
-<!--                </LinearLayout>-->
-
-<!--                &lt;!&ndash; Loose &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="16dp"-->
-<!--                    android:layout_marginEnd="16dp"-->
-<!--                    android:layout_marginBottom="16dp"-->
-<!--                    android:orientation="horizontal">-->
-
-<!--                    <ImageView-->
-<!--                        android:layout_width="50dp"-->
-<!--                        android:layout_height="50dp"-->
-<!--                        android:contentDescription="Loose album"-->
-<!--                        android:scaleType="centerCrop"-->
-<!--                        android:src="@drawable/album_loose" />-->
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_gravity="center_vertical"-->
-<!--                        android:layout_marginStart="16dp"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Loose"-->
-<!--                            android:textColor="#FFFFFF"-->
-<!--                            android:textSize="16sp" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Daniel Caesar"-->
-<!--                            android:textColor="#B3B3B3"-->
-<!--                            android:textSize="14sp" />-->
-<!--                    </LinearLayout>-->
-<!--                </LinearLayout>-->
-
-<!--                &lt;!&ndash; Nights &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="16dp"-->
-<!--                    android:layout_marginEnd="16dp"-->
-<!--                    android:layout_marginBottom="16dp"-->
-<!--                    android:orientation="horizontal">-->
-
-<!--                    <ImageView-->
-<!--                        android:layout_width="50dp"-->
-<!--                        android:layout_height="50dp"-->
-<!--                        android:contentDescription="Nights album"-->
-<!--                        android:scaleType="centerCrop"-->
-<!--                        android:src="@drawable/album_nights" />-->
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_gravity="center_vertical"-->
-<!--                        android:layout_marginStart="16dp"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Nights"-->
-<!--                            android:textColor="#FFFFFF"-->
-<!--                            android:textSize="16sp" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Frank Ocean"-->
-<!--                            android:textColor="#B3B3B3"-->
-<!--                            android:textSize="14sp" />-->
-<!--                    </LinearLayout>-->
-<!--                </LinearLayout>-->
-
-<!--                &lt;!&ndash; Kiss of Life &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="16dp"-->
-<!--                    android:layout_marginEnd="16dp"-->
-<!--                    android:layout_marginBottom="16dp"-->
-<!--                    android:orientation="horizontal">-->
-
-<!--                    <ImageView-->
-<!--                        android:layout_width="50dp"-->
-<!--                        android:layout_height="50dp"-->
-<!--                        android:contentDescription="Kiss of Life album"-->
-<!--                        android:scaleType="centerCrop"-->
-<!--                        android:src="@drawable/album_kiss_of_life" />-->
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_gravity="center_vertical"-->
-<!--                        android:layout_marginStart="16dp"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Kiss of Life"-->
-<!--                            android:textColor="#FFFFFF"-->
-<!--                            android:textSize="16sp" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Sade"-->
-<!--                            android:textColor="#B3B3B3"-->
-<!--                            android:textSize="14sp" />-->
-<!--                    </LinearLayout>-->
-<!--                </LinearLayout>-->
-
-<!--                &lt;!&ndash; BEST INTEREST &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_marginStart="16dp"-->
-<!--                    android:layout_marginEnd="16dp"-->
-<!--                    android:layout_marginBottom="16dp"-->
-<!--                    android:orientation="horizontal">-->
-
-<!--                    <ImageView-->
-<!--                        android:layout_width="50dp"-->
-<!--                        android:layout_height="50dp"-->
-<!--                        android:contentDescription="Best Interest album"-->
-<!--                        android:scaleType="centerCrop"-->
-<!--                        android:src="@drawable/album_best_interest" />-->
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_gravity="center_vertical"-->
-<!--                        android:layout_marginStart="16dp"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="BEST INTEREST"-->
-<!--                            android:textColor="#FFFFFF"-->
-<!--                            android:textSize="16sp" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="match_parent"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:ellipsize="end"-->
-<!--                            android:maxLines="1"-->
-<!--                            android:text="Tyler, The Creator"-->
-<!--                            android:textColor="#B3B3B3"-->
-<!--                            android:textSize="14sp" />-->
-<!--                    </LinearLayout>-->
-<!--                </LinearLayout>-->
 
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
