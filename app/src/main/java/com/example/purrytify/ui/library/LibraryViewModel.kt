@@ -1,11 +1,14 @@
 package com.example.purrytify.ui.library
 
 import android.app.Application
+import android.content.SharedPreferences
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.viewmodel.MusicDbViewModel
@@ -22,9 +25,14 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
     val userLiked: StateFlow<List<SongEntity>> = _userLiked.asStateFlow()
     private val musicDbViewModel = MusicDbViewModel(application)
     private var packageName: String = "com.example.purrytify" // Default value
+    private var userData: SharedPreferences? = null
 
     fun setPackageName(pkgName: String) {
         packageName = pkgName
+    }
+
+    fun setUserData(user: SharedPreferences) {
+        userData = user
     }
 
     fun initData() {
@@ -37,7 +45,7 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
                     // Get library songs
                     musicDbViewModel.librarySongs.take(1).collect { songs ->
                         _userLibrary.value = songs
-                        Log.d("LibraryViewModel", "Library songs: ${songs.size}")
+
                     }
                 }
 
@@ -69,12 +77,11 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
 
                 if (!isAlreadyInLibrary) {
                     // Insert the song to the user's library
-                    musicDbViewModel.insertSong(song, "13522042@std.stei.itb.ac.id")
-
+                    musicDbViewModel.insertSongToLibrary(song)
+                    val currentList = _userLibrary.value
+                    _userLibrary.value = currentList + song
                     // Refresh library data
                     initData()
-
-                    Log.d("LibraryViewModel", "Added song to user library: ${song.title}")
                 } else {
                     Log.d("LibraryViewModel", "Song already exists in user library: ${song.title}")
                 }

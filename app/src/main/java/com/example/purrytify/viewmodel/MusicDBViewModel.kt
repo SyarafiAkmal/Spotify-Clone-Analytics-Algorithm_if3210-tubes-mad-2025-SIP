@@ -2,9 +2,12 @@ package com.example.purrytify.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.purrytify.data.local.db.AppDatabase
@@ -15,14 +18,23 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
 import androidx.core.net.toUri
+import androidx.lifecycle.application
+import com.example.purrytify.data.local.db.entities.LibraryEntity
+import com.example.purrytify.data.local.db.entities.LibraryStatus
 import com.example.purrytify.data.local.db.entities.RecentPlaysEntity
+import kotlinx.coroutines.flow.forEach
 
 class MusicDbViewModel(application: Application) : AndroidViewModel(application) {
     private val songDao = AppDatabase.Companion.getDatabase(application).songDao()
-
+    val userEmail :String? = application.getSharedPreferences("app_prefs", MODE_PRIVATE).getString("email", "none")
     val allSongs: Flow<List<SongEntity>> =
-        songDao.getSongsByUser("13522042@std.stei.itb.ac.id").map { entities ->
+        songDao.getSongsByUser(userEmail!!).map { entities ->
             entities.map { entity ->
+                Toast.makeText(
+                    application.applicationContext,
+                    "Library songs: ${entity.id}, ${entity.title} ",
+                    Toast.LENGTH_SHORT
+                ).show()
                 SongEntity(
                     id = entity.id,
                     title = entity.title,
@@ -35,7 +47,7 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
         }
 
     val recentSongs: Flow<List<SongEntity>> =
-        songDao.getRecentSongs("13522042@std.stei.itb.ac.id").map { entities ->
+        songDao.getRecentSongs(userEmail!!).map { entities ->
             entities.map { entity ->
                 SongEntity(
                     id = entity.id,
@@ -49,7 +61,7 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
         }
 
     val librarySongs: Flow<List<SongEntity>> =
-        songDao.getLibrarySongs("13522042@std.stei.itb.ac.id").map { entities ->
+        songDao.getLibrarySongs(userEmail!!).map { entities ->
             entities.map { entity ->
                 SongEntity(
                     id = entity.id,
@@ -61,6 +73,7 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
                 )
             }
         }
+
 
     val likedSongs: Flow<List<SongEntity>> =
         songDao.getLikedSongs("13522042@std.stei.itb.ac.id").map { entities ->
@@ -140,6 +153,22 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
             val newId = songDao.insertSong(entity).toInt()
             Log.d("MusicViewModel", "Inserted id:${newId}")
             songDao.registerUserToSong(userEmail, newId)
+        }
+    }
+
+    fun insertSongToLibrary(song: SongEntity){
+        viewModelScope.launch {
+            val entity = LibraryEntity(
+                songId = song.id,
+                userEmail = userEmail!!,
+                libraryStatus = LibraryStatus.LIBRARY
+            )
+            val response = songDao.insertToLibrary(entity)
+            Toast.makeText(
+                application.applicationContext,
+                "Added ${entity.songId} to Library",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.purrytify.data.local.db
 
 import android.util.Log
 import androidx.room.*
+import com.example.purrytify.data.local.db.entities.LibraryEntity
 import com.example.purrytify.data.local.db.entities.RecentPlaysEntity
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.data.local.db.entities.SongUploader
@@ -26,6 +27,9 @@ interface SongDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSong(song: SongEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertToLibrary(librarySong: LibraryEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRecentPlay(recentPlay: RecentPlaysEntity)

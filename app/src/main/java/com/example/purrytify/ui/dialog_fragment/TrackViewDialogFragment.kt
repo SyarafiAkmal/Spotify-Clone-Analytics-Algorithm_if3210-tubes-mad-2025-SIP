@@ -1,12 +1,13 @@
 package com.example.purrytify.ui.trackview
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.SeekBar
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.R
@@ -15,15 +16,41 @@ import com.example.purrytify.databinding.FragmentTrackViewBinding
 import com.example.purrytify.ui.home.HomeViewModel
 import com.example.purrytify.utils.ImageUtils
 import com.example.purrytify.utils.MusicPlayerManager
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class TrackViewFragment : Fragment() {
+class TrackViewDialogFragment : BottomSheetDialogFragment() {
     private lateinit var binding: FragmentTrackViewBinding
     private val musicPlayerManager = MusicPlayerManager.getInstance()
     private var userIsSeeking = false
     private lateinit var homeViewModel: HomeViewModel
     private val allSongs = MutableStateFlow<List<SongEntity>>(emptyList())
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
+
+        // Set up the dialog to expand to full screen when opened
+        dialog.setOnShowListener { dialogInterface ->
+            val bottomSheetDialog = dialogInterface as BottomSheetDialog
+            val bottomSheet = bottomSheetDialog.findViewById<FrameLayout>(
+                com.google.android.material.R.id.design_bottom_sheet
+            )
+
+            bottomSheet?.let {
+                val behavior = BottomSheetBehavior.from(it)
+                behavior.skipCollapsed = true
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                behavior.peekHeight = resources.displayMetrics.heightPixels
+//                it.setBackgroundResource(R.drawable.no_corner_bottom_sheet_background)
+                it.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+            }
+        }
+
+        return dialog
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,14 +76,10 @@ class TrackViewFragment : Fragment() {
     }
 
     private fun loadSongs() {
-        // Use HomeViewModel to get songs instead of MainActivity
         viewLifecycleOwner.lifecycleScope.launch {
             homeViewModel.userAllSongs.collect { songs ->
                 if (songs.isNotEmpty()) {
                     allSongs.value = songs
-//                    songs.forEach { song ->
-//                        Toast.makeText(requireActivity(), "id:${song.id}", Toast.LENGTH_SHORT).show()
-//                    }
                 }
             }
         }
@@ -64,16 +87,13 @@ class TrackViewFragment : Fragment() {
 
     private fun setupBackButton() {
         binding.btnBack.setOnClickListener {
-            // Navigate back to previous fragment
-            parentFragmentManager.popBackStack()
+            dismiss()
         }
     }
 
     private fun setupUI() {
         val currentSong = musicPlayerManager.currentSongInfo.value
         currentSong?.let { song ->
-            // Use ImageUtils instead of directly setting URI
-            Toast.makeText(requireActivity(), "${song.title}", Toast.LENGTH_SHORT).show()
             val albumResId = ImageUtils.loadImage(
                 requireContext(),
                 song.artworkURI,
@@ -147,28 +167,26 @@ class TrackViewFragment : Fragment() {
         }
 
         binding.btnPrevious.setOnClickListener {
-            // Implement previous song logic
-            var songId = musicPlayerManager.currentSongId.value - 1
-            var newSongId = if (songId - 1 < 0) 0 else songId -1
-            Toast.makeText(requireContext(), "${newSongId}", Toast.LENGTH_SHORT).show()
-            musicPlayerManager.loadSong(requireContext(), allSongs.value.get(newSongId))
+            val songId = musicPlayerManager.currentSongId.value - 1
+            val newSongId = if (songId - 1 < 0) 0 else songId - 1
+            if (allSongs.value.isNotEmpty() && newSongId < allSongs.value.size) {
+                musicPlayerManager.loadSong(requireContext(), allSongs.value[newSongId])
+            }
         }
 
         binding.btnNext.setOnClickListener {
-            // Implement next song logic
-            var songId = musicPlayerManager.currentSongId.value - 1
-            var newSongId = (songId + 1) % allSongs.value.size
-            Toast.makeText(requireContext(), "${newSongId}", Toast.LENGTH_SHORT).show()
-            musicPlayerManager.loadSong(requireContext(), allSongs.value.get(newSongId))
+            val songId = musicPlayerManager.currentSongId.value - 1
+            if (allSongs.value.isNotEmpty()) {
+                val newSongId = (songId + 1) % allSongs.value.size
+                musicPlayerManager.loadSong(requireContext(), allSongs.value[newSongId])
+            }
         }
 
         binding.btnFavorite.setOnClickListener {
-            // Implement favorite toggle logic
             Toast.makeText(requireContext(), "Favorite toggled", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnMore.setOnClickListener {
-            // Implement more options logic
             Toast.makeText(requireContext(), "More options", Toast.LENGTH_SHORT).show()
         }
     }
@@ -195,8 +213,5 @@ class TrackViewFragment : Fragment() {
         val remainingSeconds = seconds % 60
         return String.format("%d:%02d", minutes, remainingSeconds)
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 }
+

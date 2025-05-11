@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
@@ -37,6 +38,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
+import androidx.core.graphics.drawable.toDrawable
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class LibraryFragment : Fragment() {
 
@@ -107,6 +110,17 @@ class LibraryFragment : Fragment() {
 
         // Set content view and show dialog
         bottomSheetDialog.setContentView(uploadView)
+
+        bottomSheetDialog.setOnShowListener { dialog ->
+            val d = dialog as BottomSheetDialog
+            val bottomSheet = d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            bottomSheet?.setBackgroundResource(android.R.color.transparent)
+
+            // Fix the behavior to prevent rounded corners
+            val behavior = BottomSheetBehavior.from(bottomSheet!!)
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+
         bottomSheetDialog.show()
     }
 

@@ -10,7 +10,7 @@ import android.content.Context
 import com.example.purrytify.data.local.db.entities.LibraryEntity
 import com.example.purrytify.data.local.db.entities.RecentPlaysEntity
 
-@Database(entities = [SongEntity::class, SongUploader::class, LibraryEntity::class, RecentPlaysEntity::class], version = 13)
+@Database(entities = [SongEntity::class, SongUploader::class, LibraryEntity::class, RecentPlaysEntity::class], version = 17)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
 

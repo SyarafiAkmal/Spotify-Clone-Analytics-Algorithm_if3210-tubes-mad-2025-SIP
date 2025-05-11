@@ -52,7 +52,8 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    implementation("androidx.activity:activity:1.8.2")  // Downgraded from 1.10.1
+    implementation("androidx.activity:activity:1.8.2")
+    implementation(libs.androidx.lifecycle.viewmodel.android)  // Downgraded from 1.10.1
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

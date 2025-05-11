@@ -1,9 +1,11 @@
 package com.example.purrytify.ui.home
 
 import android.app.Application
+import android.content.SharedPreferences
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,14 +23,15 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _userAllSongs = MutableStateFlow<List<SongEntity>>(emptyList())
     val userAllSongs: StateFlow<List<SongEntity>> = _userAllSongs.asStateFlow()
     private val musicDbViewModel = MusicDbViewModel(application)
-    private var packageName: String = "com.example.purrytify" // Default value
+    private var packageName: String = "com.example.purrytify"
+    private var userData: SharedPreferences? = null
 
     fun setPackageName(pkgName: String) {
         packageName = pkgName
     }
 
-    fun setRecentPlayed(songs: List<SongEntity>){
-        _userRecentPlayed.value = songs
+    fun setUserData(user: SharedPreferences) {
+        userData = user
     }
 
     fun addToRecentPlayed(song: SongEntity) {

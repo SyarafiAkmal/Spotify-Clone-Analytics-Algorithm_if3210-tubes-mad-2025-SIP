@@ -7,36 +7,29 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.purrytify.databinding.ActivityMainBinding
 import com.example.purrytify.utils.MusicPlayerManager
-import kotlinx.coroutines.flow.collect
 import android.util.Log
-import android.widget.LinearLayout
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
-import com.example.purrytify.ui.home.HomeFragment
-import com.example.purrytify.viewmodel.AlbumItemView
 import com.example.purrytify.viewmodel.MusicDbViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.purrytify.ui.home.HomeViewModel
 import com.example.purrytify.ui.library.LibraryViewModel
+import com.example.purrytify.ui.trackview.TrackViewDialogFragment
 import com.example.purrytify.utils.ImageUtils
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     val musicPlayerManager = MusicPlayerManager.getInstance()
-    private val musicDbViewModel: MusicDbViewModel by viewModels()
     private val homeViewModel: HomeViewModel by viewModels()
     private val libraryViewModel: LibraryViewModel by viewModels()
-    val userSongs = MutableStateFlow<List<SongEntity>>(emptyList())
+    private val musicDBViewModel: MusicDbViewModel by viewModels()
     val userLibrary = MutableStateFlow<List<SongEntity>>(emptyList())
-    val userLiked = MutableStateFlow<List<SongEntity>>(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +44,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
         loadInitialData()
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setupLibraryObservation()
         setContentView(binding.root)
         setupNavigationAndListeners()
@@ -62,7 +55,6 @@ class MainActivity : AppCompatActivity() {
     private fun loadInitialData() {
         lifecycleScope.launch {
             val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-            val userEmail = "13522042@std.stei.itb.ac.id" // Your user email
 
             Toast.makeText(this@MainActivity, "${prefs.getString("email", "none")}", Toast.LENGTH_SHORT).show()
 
@@ -106,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             musicPlayerManager.isPlaying.collect { isPlaying ->
                 updatePlayButtonIcon(isPlaying)
-                updateMiniPlayerUI()
+//                updateMiniPlayerUI()
             }
         }
 
@@ -123,9 +115,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateMiniPlayerUI() {
         val currentSong = musicPlayerManager.currentSongInfo.value
-        val currentDestination = findNavController(R.id.nav_host_fragment_activity_main).currentDestination?.id
 
-        if (currentSong != null && currentDestination != R.id.navigation_track_view && currentDestination != R.id.navigation_profile) {
+        if (currentSong != null) {
             binding.miniPlayerSongTitle?.text = currentSong.title
             binding.miniPlayerArtistName?.text = currentSong.artist
 
@@ -156,6 +147,7 @@ class MainActivity : AppCompatActivity() {
             currentSong?.let { song ->
                 // Convert MusicPlayerManager's current song to SongEntity if needed
                 val songEntity = SongEntity(
+                    id = song.id,
                     title = song.title,
                     artist = song.artist,
                     artworkURI = song.artworkURI,
@@ -169,8 +161,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.miniPlayerClick?.setOnClickListener {
-            val navController = findNavController(R.id.nav_host_fragment_activity_main)
-            navController.navigate(R.id.navigation_track_view)
+            // Show the full-screen dialog
+            TrackViewDialogFragment().show(supportFragmentManager, "track_view_dialog")
         }
 
         val navView: BottomNavigationView = binding.navView
@@ -181,7 +173,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_library -> {
                     updateMiniPlayerUI()
                 }
-                R.id.navigation_track_view,
                 R.id.navigation_profile -> {
                     toggleMiniPlayer(false)
                 }
@@ -207,11 +198,6 @@ class MainActivity : AppCompatActivity() {
                 libraryViewModel.addSongToUserLibrary(song)
 
                 // Show a toast to notify the user
-                Toast.makeText(
-                    this@MainActivity,
-                    "Added ${song.title} to Library",
-                    Toast.LENGTH_SHORT
-                ).show()
             } else {
                 // Optionally show a different toast if song is already in library
                 Toast.makeText(
