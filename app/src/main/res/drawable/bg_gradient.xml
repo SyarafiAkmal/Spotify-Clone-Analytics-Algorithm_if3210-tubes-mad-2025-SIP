@@ -1,0 +1,15 @@
+<!-- res/drawable/bg_gradient.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item>
+    <shape android:shape="rectangle">
+      <gradient
+          android:type="linear"
+          android:angle="270"
+          android:startColor="#1C8075"
+          android:centerColor="#1D4569"
+          android:centerY="0.21"
+          android:endColor="#121212"
+          android:useLevel="false" />
+    </shape>
+  </item>
+</layer-list>
