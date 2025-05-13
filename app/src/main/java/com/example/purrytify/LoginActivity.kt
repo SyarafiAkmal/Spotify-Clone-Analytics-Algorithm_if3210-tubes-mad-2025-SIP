@@ -59,6 +59,7 @@ class LoginActivity : AppCompatActivity() {
                     putString("username", profile.username)
                     putString("email", profile.email)
                     putString("profile_pict", profile.profilePhoto)
+                    putString("createdAt", profile.createdAt)
                 }
 
                 // Navigate to MainActivity

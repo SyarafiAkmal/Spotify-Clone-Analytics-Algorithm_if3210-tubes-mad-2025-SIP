@@ -2,10 +2,9 @@ package com.example.purrytify.data.local.db
 
 import android.util.Log
 import androidx.room.*
-import com.example.purrytify.data.local.db.entities.LibraryEntity
-import com.example.purrytify.data.local.db.entities.RecentPlaysEntity
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.data.local.db.entities.SongUploader
+import com.example.purrytify.utils.DateTimeUtils
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,60 +16,72 @@ interface SongDao {
     @Query("SELECT EXISTS(SELECT 1 FROM song_entity WHERE title = :title AND artist = :artist)")
     suspend fun isSongExists(title: String, artist: String): Boolean
 
-    @Query("INSERT INTO song_uploader (uploaderEmail, songId) VALUES (:uploader, :songId)")
-    suspend fun registerUserToSong(uploader: String, songId: Int)
+    @Query("INSERT INTO song_uploader (uploaderEmail, songId, libraryStatus, lastPlayed) VALUES (:uploader, :songId, :libraryStatus, :lastPlayed)")
+    suspend fun registerUserToSong(
+        uploader: String,
+        songId: Int,
+        libraryStatus: String = "library",
+        lastPlayed: String = DateTimeUtils.getEmptyTimeValue()
+    )
 
     @Query("""
-        SELECT EXISTS(SELECT 1 FROM recent_entity AS re WHERE re.userEmail = :userEmail AND re.songId = :songId)
+    SELECT s.* FROM song_entity AS s
+    JOIN song_uploader AS su ON s.id = su.songId
+    WHERE su.uploaderEmail = :userEmail AND su.lastPlayed != :emptyTimeValue
+    ORDER BY su.lastPlayed DESC
+    LIMIT :limit
     """)
-    suspend fun isRecentPlayExists(userEmail: String, songId: Int): Boolean
+    fun getRecentlyPlayedSongs(
+        userEmail: String,
+        limit: Int = 10,
+        emptyTimeValue: String = DateTimeUtils.getEmptyTimeValue()
+    ): Flow<List<SongEntity>>
+
+    @Query("""
+    SELECT su.* FROM song_uploader AS su
+    WHERE uploaderEmail = :userEmail
+    """)
+    fun getSongUploader(
+        userEmail: String
+    ): Flow<List<SongUploader>>
+
+    @Query("UPDATE song_uploader SET lastPlayed = :lastPlayed WHERE uploaderEmail = :uploader AND songId = :songId")
+    suspend fun updateLastPlayed(uploader: String, songId: Int, lastPlayed: String = DateTimeUtils.getCurrentTimeIso())
+
+    @Query("UPDATE song_uploader SET libraryStatus = :libraryStatus WHERE uploaderEmail = :uploader AND songId = :songId")
+    suspend fun updateLibraryStatus(uploader: String, songId: Int, libraryStatus: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSong(song: SongEntity): Long
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertToLibrary(librarySong: LibraryEntity): Long
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertRecentPlay(recentPlay: RecentPlaysEntity)
-
-    @Query("INSERT INTO recent_entity (userEmail, songId) VALUES (:userEmail, :songId)")
-    suspend fun addToRecentPlays(userEmail: String, songId: Int)
 
     @Query("""
         SELECT s.* FROM song_entity AS s
         JOIN song_uploader AS su ON s.id = su.songId
         WHERE su.uploaderEmail = :userEmail
+        ORDER BY s.id DESC
     """)
     fun getSongsByUser(userEmail: String): Flow<List<SongEntity>>
 
     @Query("""
         SELECT s.* FROM song_entity AS s
-        JOIN recent_entity AS re ON s.id = re.songId
-        WHERE re.userEmail = :userEmail
-    """)
-    fun getRecentSongs(userEmail: String): Flow<List<SongEntity>>
-
-    @Query("""
-        SELECT s.* FROM song_entity AS s
-        JOIN library_entity AS le ON s.id = le.songId
-        WHERE le.userEmail = :userEmail AND le.libraryStatus = 'library'
-    """)
-    fun getLibrarySongs(userEmail: String): Flow<List<SongEntity>>
-
-    @Query("""
-        SELECT s.* FROM song_entity AS s
-        JOIN library_entity AS le ON s.id = le.songId
-        WHERE le.userEmail = :userEmail AND le.libraryStatus = 'like'
+        JOIN song_uploader AS su ON s.id = su.songId
+        WHERE su.uploaderEmail = :userEmail AND su.libraryStatus = 'like'
     """)
     fun getLikedSongs(userEmail: String): Flow<List<SongEntity>>
 
     @Query("""
         SELECT s.* FROM song_entity AS s
-        JOIN library_entity AS le ON s.id = le.songId
-        WHERE le.userEmail = :userEmail AND le.libraryStatus = 'listened'
+        JOIN song_uploader AS su ON s.id = su.songId
+        WHERE su.uploaderEmail = :userEmail AND su.libraryStatus = 'like' AND su.songId = :id
     """)
-    fun getListenedSongs(userEmail: String): Flow<List<SongEntity>>
+    suspend fun getLikedSongById(userEmail: String, id: Int): SongEntity?
+
+    @Query("""
+    SELECT COUNT(s.id) FROM song_entity AS s
+    JOIN song_uploader AS su ON s.id = su.songId
+    WHERE su.uploaderEmail = :userEmail AND su.libraryStatus = 'listened'
+    """)
+    fun getListenedSongsCount(userEmail: String): Flow<Int>
 
     @Query("SELECT id FROM song_entity WHERE title = :title AND artist = :artist")
     suspend fun getSongId(title: String, artist: String): Int

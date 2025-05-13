@@ -1,4 +1,4 @@
-package com.example.purrytify.viewmodel
+package com.example.purrytify.views
 
 import android.content.Context
 import android.util.AttributeSet

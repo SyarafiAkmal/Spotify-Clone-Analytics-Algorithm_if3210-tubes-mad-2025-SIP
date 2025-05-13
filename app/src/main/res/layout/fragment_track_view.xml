@@ -102,7 +102,7 @@
         android:layout_marginEnd="24dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:padding="8dp"
-        android:src="@drawable/favorite_border"
+        android:src="@drawable/favorited_0"
         app:layout_constraintBottom_toBottomOf="@id/track_artist"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/track_title"

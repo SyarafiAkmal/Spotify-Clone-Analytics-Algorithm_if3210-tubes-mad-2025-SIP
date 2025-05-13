@@ -5,17 +5,13 @@ import android.content.SharedPreferences
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.purrytify.data.local.db.entities.SongEntity
-import com.example.purrytify.viewmodel.MusicDbViewModel
+import com.example.purrytify.views.MusicDbViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _userRecentPlayed = MutableStateFlow<List<SongEntity>>(emptyList())
@@ -42,18 +38,17 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             // Add the new song at the beginning of the list
             add(0, song)
         }
-        musicDbViewModel.addRecentPlays(_userRecentPlayed.value)
+        musicDbViewModel.updateLastPlayed(song)
     }
 
     fun initData() {
         viewModelScope.launch {
             try {
                 Log.d("HomeViewModel", "Attempting to initialize data")
-                val userEmail = "13522042@std.stei.itb.ac.id"
 
                 launch {
                     musicDbViewModel.allSongs.take(1).collect { songs ->
-                        _userAllSongs.value = songs
+                        _userAllSongs.value = songs.take(10)
                         Log.d("HomeViewModel", "Home All songs: ${songs.size}")
                         songs.forEach{ song ->
                             Log.d("HomeViewModel", "Title-id: ${song.title}-${song.id}")
@@ -63,7 +58,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
                 launch {
                     musicDbViewModel.recentSongs.take(1).collect { songs ->
-                        _userRecentPlayed.value = songs
+                        _userRecentPlayed.value = songs.take(10)
                         Log.d("HomeViewModel", "Home Recent songs: ${songs.size}")
                     }
                 }

@@ -8,25 +8,32 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.R
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.databinding.FragmentTrackViewBinding
 import com.example.purrytify.ui.home.HomeViewModel
+import com.example.purrytify.ui.library.LibraryViewModel
 import com.example.purrytify.utils.ImageUtils
 import com.example.purrytify.utils.MusicPlayerManager
+import com.example.purrytify.views.MusicDbViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 class TrackViewDialogFragment : BottomSheetDialogFragment() {
     private lateinit var binding: FragmentTrackViewBinding
-    private val musicPlayerManager = MusicPlayerManager.getInstance()
+    private var musicPlayerManager = MusicPlayerManager.getInstance()
     private var userIsSeeking = false
     private lateinit var homeViewModel: HomeViewModel
+    private lateinit var libraryViewModel: LibraryViewModel
+    private lateinit var musicDBViewModel: MusicDbViewModel
     private val allSongs = MutableStateFlow<List<SongEntity>>(emptyList())
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -59,6 +66,8 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
     ): View {
         binding = FragmentTrackViewBinding.inflate(inflater, container, false)
         homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
+        libraryViewModel = ViewModelProvider(requireActivity())[LibraryViewModel::class.java]
+        musicDBViewModel = ViewModelProvider(requireActivity())[MusicDbViewModel::class.java]
         return binding.root
     }
 
@@ -100,6 +109,18 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
                 binding.albumCover
             )
 
+            lifecycleScope.launch {
+                val currentSongLiked = musicDBViewModel.getLikedSongById(currentSong?.id!!)
+//                Toast.makeText(requireContext(), "${currentSongLiked?.id} song is from like", Toast.LENGTH_SHORT).show()
+                // Now use currentSongLiked here
+                if (currentSongLiked !== null) {
+                    // The song is like
+                    binding.btnFavorite.setImageResource(R.drawable.favorited_1)
+                } else {
+                    // The song is not liked
+                    binding.btnFavorite.setImageResource(R.drawable.favorited_0)
+                }
+            }
             binding.albumCover.setImageResource(albumResId)
             binding.trackTitle.text = song.title
             binding.trackArtist.text = song.artist
@@ -182,12 +203,36 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
             }
         }
 
+
         binding.btnFavorite.setOnClickListener {
-            Toast.makeText(requireContext(), "Favorite toggled", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(requireContext(), "Favorite toggled", Toast.LENGTH_SHORT).show()
+            updateAndToggleFavoriteState()
         }
 
         binding.btnMore.setOnClickListener {
             Toast.makeText(requireContext(), "More options", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updateAndToggleFavoriteState() {
+        val currentSongId = musicPlayerManager.currentSongInfo.value?.id
+        lifecycleScope.launch {
+            val currentSongLiked = musicDBViewModel.getLikedSongById(currentSongId!!)
+//            Toast.makeText(requireContext(), "${currentSongLiked === null}", Toast.LENGTH_SHORT).show()
+            // Now use currentSongLiked here
+            if (currentSongLiked === null) {
+                // The song is liked
+                binding.btnFavorite.setImageResource(R.drawable.favorited_1)
+//                Toast.makeText(requireContext(), "${currentSongId} liked", Toast.LENGTH_SHORT).show()
+                musicDBViewModel.updateStatus(musicPlayerManager.currentSongInfo.value!!, "like")
+                libraryViewModel.addToLiked(musicPlayerManager.currentSongInfo.value!!)
+            } else {
+                // The song is not liked
+                binding.btnFavorite.setImageResource(R.drawable.favorited_0)
+//                Toast.makeText(requireContext(), "${currentSongId} listened", Toast.LENGTH_SHORT).show()
+                musicDBViewModel.updateStatus(musicPlayerManager.currentSongInfo.value!!, "listened")
+                libraryViewModel.deleteFromLiked(musicPlayerManager.currentSongInfo.value!!)
+            }
         }
     }
 

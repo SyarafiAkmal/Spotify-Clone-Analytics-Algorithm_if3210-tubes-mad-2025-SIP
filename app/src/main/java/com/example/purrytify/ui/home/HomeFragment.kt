@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -18,8 +17,8 @@ import com.example.purrytify.R
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.databinding.FragmentHomeBinding
 import com.example.purrytify.utils.ImageUtils
-import com.example.purrytify.viewmodel.AlbumItemView
-import com.example.purrytify.viewmodel.LibraryItemView
+import com.example.purrytify.views.AlbumItemView
+import com.example.purrytify.views.LibraryItemView
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {

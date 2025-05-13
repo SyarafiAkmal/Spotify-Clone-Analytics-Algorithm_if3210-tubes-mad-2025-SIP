@@ -3,15 +3,10 @@ package com.example.purrytify.ui.library
 import android.app.Application
 import android.content.SharedPreferences
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.example.purrytify.data.local.db.entities.SongEntity
-import com.example.purrytify.viewmodel.MusicDbViewModel
+import com.example.purrytify.views.MusicDbViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,8 +14,8 @@ import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 class LibraryViewModel(application: Application) : AndroidViewModel(application) {
-    private val _userLibrary = MutableStateFlow<List<SongEntity>>(emptyList())
-    val userLibrary: StateFlow<List<SongEntity>> = _userLibrary.asStateFlow()
+    private var _userLibrary = MutableStateFlow<List<SongEntity>>(emptyList())
+    var userLibrary: StateFlow<List<SongEntity>> = _userLibrary.asStateFlow()
     private val _userLiked = MutableStateFlow<List<SongEntity>>(emptyList())
     val userLiked: StateFlow<List<SongEntity>> = _userLiked.asStateFlow()
     private val musicDbViewModel = MusicDbViewModel(application)
@@ -43,7 +38,7 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
 
                 launch {
                     // Get library songs
-                    musicDbViewModel.librarySongs.take(1).collect { songs ->
+                    musicDbViewModel.allSongs.take(1).collect { songs ->
                         _userLibrary.value = songs
 
                     }
@@ -64,28 +59,21 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun addSongToUserLibrary(song: SongEntity) {
-        viewModelScope.launch {
-            try {
-                // Check if the song already exists in the library
-                val isAlreadyInLibrary = _userLibrary.value.any {
-                    it.title == song.title && it.artist == song.artist
-                }
+    fun addToLibrary(song: SongEntity) {
+        _userLibrary.value = _userLibrary.value.toMutableList().apply {
+            add(0, song)
+        }
+    }
 
-                if (!isAlreadyInLibrary) {
-                    // Insert the song to the user's library
-                    musicDbViewModel.insertSongToLibrary(song)
-                    val currentList = _userLibrary.value
-                    _userLibrary.value = currentList + song
-                    // Refresh library data
-                    initData()
-                } else {
-                    Log.d("LibraryViewModel", "Song already exists in user library: ${song.title}")
-                }
-            } catch (e: Exception) {
-                Log.e("LibraryViewModel", "Error adding song to user library", e)
-                e.printStackTrace()
-            }
+    fun addToLiked(song: SongEntity) {
+        _userLiked.value = _userLiked.value.toMutableList().apply {
+            add(0, song)
+        }
+    }
+
+    fun deleteFromLiked(song: SongEntity) {
+        _userLiked.value = _userLiked.value.toMutableList().apply {
+            remove(song)
         }
     }
 
@@ -93,9 +81,7 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             // Use your existing method to insert song
             musicDbViewModel.checkAndInsertSong(song)
-
             // Refresh library data
-            initData()
         }
     }
 }

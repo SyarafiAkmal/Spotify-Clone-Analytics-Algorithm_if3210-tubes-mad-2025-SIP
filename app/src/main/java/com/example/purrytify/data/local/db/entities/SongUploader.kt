@@ -8,5 +8,7 @@ import androidx.room.PrimaryKey
 )
 data class SongUploader(
     val uploaderEmail: String,
-    val songId: Int
+    val songId: Int,
+    val lastPlayed: String, // ISO string of time format, important for recently played
+    val libraryStatus: String // Liked, Listened, by default it's library but all songs go to library
 )

@@ -15,7 +15,7 @@ import com.example.purrytify.databinding.ActivityMainBinding
 import com.example.purrytify.utils.MusicPlayerManager
 import android.util.Log
 import kotlinx.coroutines.launch
-import com.example.purrytify.viewmodel.MusicDbViewModel
+import com.example.purrytify.views.MusicDbViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.purrytify.ui.home.HomeViewModel
 import com.example.purrytify.ui.library.LibraryViewModel
@@ -56,40 +56,10 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
 
-            Toast.makeText(this@MainActivity, "${prefs.getString("email", "none")}", Toast.LENGTH_SHORT).show()
-
-            val songsToInsert = listOf(
-                SongEntity(
-                    title = "Starboy",
-                    artist = "The Weeknd, Daft Punk",
-                    artworkURI = "android.resource://${packageName}/drawable/starboy_album",
-                    uri = "android.resource://${packageName}/raw/starboy",
-                    duration = 0
-                ),
-                SongEntity(
-                    title = "Kiss of Life",
-                    artist = "Sade",
-                    artworkURI = "android.resource://${packageName}/drawable/album_kiss_of_life",
-                    uri = "android.resource://${packageName}/raw/kiss_of_life",
-                    duration = 0
-                ),
-                SongEntity(
-                    title = "BEST INTEREST",
-                    artist = "Tyler, The Creator",
-                    artworkURI = "android.resource://${packageName}/drawable/album_best_interest",
-                    uri = "android.resource://${packageName}/raw/best_interest",
-                    duration = 0
-                )
-            )
-
-            // Insert each song
-//            musicDbViewModel.insertSongs(songsToInsert, userEmail)
-
+//            Toast.makeText(this@MainActivity, "${prefs.getString("email", "none")}", Toast.LENGTH_SHORT).show()
             musicPlayerManager.clearCurrentSong()
         }
     }
-
-
 
     fun updateRecentlyPlayedInHome(song: SongEntity) {
         homeViewModel.addToRecentPlayed(song)
@@ -99,7 +69,6 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             musicPlayerManager.isPlaying.collect { isPlaying ->
                 updatePlayButtonIcon(isPlaying)
-//                updateMiniPlayerUI()
             }
         }
 
@@ -156,8 +125,12 @@ class MainActivity : AppCompatActivity() {
                     duration = song.duration
                 )
 
-                // Add to library
-                addSongToLibrary(songEntity)
+                Toast.makeText(
+                    this@MainActivity,
+                    "This button is kinda useless now",
+                    Toast.LENGTH_SHORT
+                ).show()
+
             }
         }
 
@@ -172,8 +145,7 @@ class MainActivity : AppCompatActivity() {
             when (destination.id) {
                 R.id.navigation_home,
                 R.id.navigation_library -> {
-//                    updateMiniPlayerUI()
-                    if(musicPlayerManager.isPlaying.value){
+                    if(musicPlayerManager.currentSongInfo.value !== null){
                         toggleMiniPlayer(true)
                     }
                 }
@@ -192,26 +164,26 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun addSongToLibrary(song: SongEntity) {
-        // Check if song is already in library to prevent duplicates
-        lifecycleScope.launch {
-            val isAlreadyInLibrary = userLibrary.value.any { it.title == song.title && it.artist == song.artist }
-
-            if (!isAlreadyInLibrary) {
-                // Insert the song into the library
-                libraryViewModel.addSongToUserLibrary(song)
-
-                // Show a toast to notify the user
-            } else {
-                // Optionally show a different toast if song is already in library
-                Toast.makeText(
-                    this@MainActivity,
-                    "${song.title} is already in your Library",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
+//    private fun addSongToLibrary(song: SongEntity) {
+//        // Check if song is already in library to prevent duplicates
+//        lifecycleScope.launch {
+//            val isAlreadyInLibrary = libraryViewModel.userLibrary.value.any { it.title == song.title && it.artist == song.artist }
+//
+//            if (!isAlreadyInLibrary) {
+//                // Insert the song into the library
+////                libraryViewModel.addSongToUserLibrary(song)
+//
+//                // Show a toast to notify the user
+//            } else {
+//                // Optionally show a different toast if song is already in library
+//                Toast.makeText(
+//                    this@MainActivity,
+//                    "${song.title} is already in your Library",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//            }
+//        }
+//    }
 
     private fun observeLibraryChanges() {
         lifecycleScope.launch {
@@ -227,19 +199,5 @@ class MainActivity : AppCompatActivity() {
         libraryViewModel.initData()
         observeLibraryChanges()
     }
-
-    //    private fun getDrawableResourceFromUri(songUri: String): Int {
-//        return try {
-//            val resourceName = songUri.substringAfterLast("/")
-//            val drawableResourceId = resources.getIdentifier(
-//                resourceName,
-//                "drawable",
-//                packageName
-//            )
-//            drawableResourceId.takeIf { it != 0 } ?: R.drawable.logo
-//        } catch (e: Exception) {
-//            R.drawable.logo
-//        }
-//    }
 
 }

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:id="@+id/capsuleStats"
+    android:layout_width="match_parent"
+    android:paddingHorizontal="16dp"
+    android:layout_height="wrap_content">
+
+    <!-- Date Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="2dp">
+
+        <TextView
+            android:id="@+id/tvMonthYear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Month Year"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:layout_marginBottom="15dp"
+            android:textStyle="bold"/>
+
+        <ImageButton
+            android:id="@+id/btnShare"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="5dp"
+            android:scaleType="fitXY"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/share_button"/>
+    </LinearLayout>
+
+    <!-- Minute Counts -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardTimeListened"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="#1A1A1A"
+        android:layout_marginBottom="15dp"
+        app:cardCornerRadius="12dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- Time Listened -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Time Listened"
+                    android:layout_weight="1"
+                    android:textColor="#FFFFFF"/>
+
+                <ImageButton
+                    android:id="@+id/btnTimeArrow"
+                    android:layout_width="10dp"
+                    android:layout_height="13dp"
+                    android:layout_marginTop="4dp"
+                    android:scaleType="fitXY"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/arrow_right"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="18dp"
+                android:paddingBottom="18dp">
+
+                <TextView
+                    android:id="@+id/tvMinutes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18dp"
+                    android:text="X minutes"
+                    android:textStyle="bold"
+                    android:textColor="#1DB954"/>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardTopArtist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:cardBackgroundColor="#1A1A1A"
+            android:layout_marginBottom="15dp"
+            app:cardCornerRadius="12dp">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="18dp">
+
+                <!-- Top Artist Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Top Artist"
+                        android:layout_weight="1"
+                        android:textColor="#FFFFFF"
+                        android:layout_marginBottom="10dp"/>
+
+                    <ImageButton
+                        android:id="@+id/btnArtistArrow"
+                        android:layout_width="10dp"
+                        android:layout_height="13dp"
+                        android:layout_marginTop="4dp"
+                        android:scaleType="fitXY"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/arrow_right"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvTopArtist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Artist Name"
+                    android:textColor="#669BEC"
+                    android:textSize="18dp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="match_parent"/>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardTopSong"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:cardBackgroundColor="#1A1A1A"
+            android:layout_marginBottom="15dp"
+            app:cardCornerRadius="12dp">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="18dp">
+
+                <!-- Top Song Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Top Song"
+                        android:layout_weight="1"
+                        android:textColor="#FFFFFF"
+                        android:layout_marginBottom="10dp"/>
+
+                    <ImageButton
+                        android:id="@+id/btnSongArrow"
+                        android:layout_width="10dp"
+                        android:layout_height="13dp"
+                        android:layout_marginTop="4dp"
+                        android:scaleType="fitXY"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/arrow_right"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvTopSong"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Song Title"
+                    android:textColor="#F8E747"
+                    android:textSize="18dp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+    <!-- Music Streaks -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardStreak"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="#1A1A1A"
+        android:layout_marginBottom="15dp"
+        app:cardCornerRadius="12dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/ivStreakImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:src="@drawable/loose"
+                android:layout_marginBottom="20dp"/>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/tvStreakTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="You had a 5-day streak!"
+                    android:textSize="20dp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="11dp"/>
+
+                <TextView
+                    android:id="@+id/tvStreakDescription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#B3B3B3"
+                    android:textSize="10dp"
+                    android:text="You played Loose by Daniel Caesar day after day. You were on fire!"
+                    android:layout_marginBottom="20dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/tvStreakDates"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Month dd-dd, Year"
+                        android:layout_weight="1"
+                        android:textSize="10dp"
+                        android:textColor="#B3B3B3"/>
+
+                    <ImageButton
+                        android:id="@+id/btnStreakShare"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_marginTop="4dp"
+                        android:scaleType="fitXY"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/share_button"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

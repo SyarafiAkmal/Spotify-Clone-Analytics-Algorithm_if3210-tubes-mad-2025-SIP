@@ -17,7 +17,9 @@ import com.example.purrytify.R
 import com.example.purrytify.databinding.FragmentProfileBinding
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.widget.LinearLayout
 import androidx.core.view.isVisible
+import com.example.purrytify.viewmodel.CapsuleStatsView
 
 class ProfileFragment : Fragment() {
 
@@ -117,6 +119,79 @@ class ProfileFragment : Fragment() {
         viewModel.loadProfileData(prefs)
 
         binding.profileName.text = prefs.getString("username", "")
+
+        // Clear existing views
+        val soundCapsulePlaceholder = binding.soundCapsule
+
+        // Create and add April capsule
+        val aprilCapsule = CapsuleStatsView(requireContext()).apply {
+            setMonthYear("April 2025")
+            setMinutes(862)
+            setTopArtist("The Beatles")
+            setTopSong("Starboy")
+            setStreakInfo(5, "Loose", "Daniel Caesar", "Apr 21", "Apr 25")
+            setStreakImage(R.drawable.loose)
+
+            // Set click listeners
+            setOnTimeListenedClickListener {
+                Toast.makeText(requireContext(), "Time listened details", Toast.LENGTH_SHORT).show()
+            }
+
+            setOnTopArtistClickListener {
+                Toast.makeText(requireContext(), "Artist: The Beatles", Toast.LENGTH_SHORT).show()
+            }
+
+            setOnTopSongClickListener {
+                Toast.makeText(requireContext(), "Song: Starboy", Toast.LENGTH_SHORT).show()
+            }
+
+            setOnShareClickListener {
+                Toast.makeText(requireContext(), "Sharing...", Toast.LENGTH_SHORT).show()
+            }
+
+            // Set layout params if needed
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            params.bottomMargin = resources.getDimensionPixelSize(R.dimen.margin_medium)
+            layoutParams = params
+        }
+
+        // Create and add March capsule
+        val marchCapsule = CapsuleStatsView(requireContext()).apply {
+            setMonthYear("March 2025")
+            setMinutes(601)
+            setTopArtist("Doechii")
+            setTopSong("Nights")
+
+            // Set layout params
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            layoutParams = params
+
+            // Add similar click listeners if needed
+        }
+
+        // Add views to container
+        soundCapsulePlaceholder.addView(aprilCapsule)
+        soundCapsulePlaceholder.addView(marchCapsule)
+
+        // Add animation effects similar to your LibraryItemView if desired
+        aprilCapsule.setOnClickListener {
+            aprilCapsule.animate()
+                .alpha(0.9f)
+                .setDuration(100)
+                .withEndAction {
+                    aprilCapsule.animate()
+                        .alpha(1f)
+                        .setDuration(100)
+                        .start()
+                }
+                .start()
+        }
     }
 
     private fun setupClickListeners() {

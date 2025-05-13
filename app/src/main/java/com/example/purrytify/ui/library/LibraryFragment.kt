@@ -1,12 +1,12 @@
 package com.example.purrytify.ui.library
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.ColorDrawable
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
@@ -21,7 +21,6 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -33,12 +32,12 @@ import com.example.purrytify.R
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.databinding.FragmentLibraryBinding
 import com.example.purrytify.utils.ImageUtils
-import com.example.purrytify.viewmodel.LibraryItemView
+import com.example.purrytify.views.LibraryItemView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
-import androidx.core.graphics.drawable.toDrawable
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class LibraryFragment : Fragment() {
@@ -54,6 +53,7 @@ class LibraryFragment : Fragment() {
     private var selectedAudioUri: Uri? = null
     private var selectedArtworkUri: Uri? = null
     private var isAudioUploaded = false
+    private var extractedAlbumArt: Bitmap? = null // Add this field to store extracted album art
 
     private lateinit var titleEditText: EditText
     private lateinit var artistEditText: EditText
@@ -99,9 +99,6 @@ class LibraryFragment : Fragment() {
         // Initialize UI Elements
         initializeDialogViews(uploadView)
 
-        // Reset upload state when opening dialog
-        resetUploadState()
-
         // Set up listeners
         setupFileUploadListeners()
 
@@ -146,22 +143,6 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    private fun resetUploadState() {
-        selectedAudioUri = null
-        selectedArtworkUri = null
-        isAudioUploaded = false
-
-        titleEditText.setText("")
-        artistEditText.setText("")
-        durationTextView.text = "0:00"
-        mp3FileNameText.text = "Upload File"
-        uploadStatusText.visibility = View.GONE
-
-        // Note: We don't reset the uploadPhoto layout here
-        // The default layout is defined in XML and should remain intact
-        // until an image is uploaded
-    }
-
     private fun setupFileUploadListeners() {
         // Audio File Selection
         uploadFileCard.setOnClickListener {
@@ -172,7 +153,7 @@ class LibraryFragment : Fragment() {
             startActivityForResult(intent, PICK_AUDIO_REQUEST)
         }
 
-        // Artwork File Selection (if available in your layout)
+        // Artwork File Selection
         artworkFileCard.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -246,13 +227,26 @@ class LibraryFragment : Fragment() {
                 return
             }
 
-            // Save artwork if selected, or use default
-            val artworkPath = selectedArtworkUri?.let {
-                saveFileToInternalStorage(it, "image")
-            } ?: "drawable/default_album_art"
+            val artworkPath = when {
+                // If user selected a custom image
+                selectedArtworkUri != null -> {
+                    saveFileToInternalStorage(selectedArtworkUri!!, "image")
+                }
+                // If song has embedded artwork
+                extractedAlbumArt != null -> {
+                    // Save the embedded album art
+                    saveEmbeddedArtwork(extractedAlbumArt!!)
+                }
+                // No artwork available
+                else -> {
+                    ""
+                }
+            }
+
+            // Get metadata for duration
+            val metadata = extractMetadata(selectedAudioUri!!)
 
             // Create song entity and save to database
-            val metadata = extractMetadata(selectedAudioUri!!)
             val newSong = SongEntity(
                 id = 0, // Database will assign auto-increment id
                 title = title,
@@ -270,11 +264,35 @@ class LibraryFragment : Fragment() {
                 Toast.makeText(requireContext(), "Song added to library", Toast.LENGTH_SHORT).show()
 
                 // Refresh data
-//                loadLibraryData()
+                libraryViewModel.addToLibrary(newSong)
             }
         } catch (e: Exception) {
             Log.e("LibraryFragment", "Error saving song", e)
             Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Save embedded artwork from bitmap to file
+    private fun saveEmbeddedArtwork(bitmap: Bitmap): String {
+        return try {
+            // Create a unique filename with timestamp
+            val timestamp = System.currentTimeMillis()
+            val filename = "${timestamp}.jpg"
+
+            // Create file in internal storage
+            val file = File(requireContext().filesDir, filename)
+
+            // Save the bitmap to file
+            file.outputStream().use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+                outputStream.flush()
+            }
+
+            // Return our custom reference format
+            "custom_artwork:$timestamp"
+        } catch (e: Exception) {
+            Log.e("LibraryFragment", "Error saving embedded artwork", e)
+            "drawable/default_album_art"
         }
     }
 
@@ -289,8 +307,59 @@ class LibraryFragment : Fragment() {
         // Update the file name text
         mp3FileNameText.text = fileName
 
+        // If we have album art, update the photo layout
+        if (metadata.albumArt != null) {
+            extractedAlbumArt = metadata.albumArt
+            updateUploadPhotoWithBitmap(metadata.albumArt)
+        }
+
         // Mark audio as uploaded
         isAudioUploaded = true
+    }
+
+    private fun updateUploadPhotoWithBitmap(bitmap: Bitmap) {
+        try {
+            // First, clear all existing views
+            uploadPhotoLayout.removeAllViews()
+
+            // Create and add the image view for the album art
+            val albumArtImageView = ImageView(requireContext()).apply {
+                id = View.generateViewId()
+                layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT
+                )
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                setImageBitmap(bitmap)
+            }
+            uploadPhotoLayout.addView(albumArtImageView)
+
+            // Add the edit icon at the bottom right corner
+            val editIconView = ImageView(requireContext()).apply {
+                layoutParams = RelativeLayout.LayoutParams(
+                    resources.getDimensionPixelSize(R.dimen.album_item_margin),
+                    resources.getDimensionPixelSize(R.dimen.album_item_margin)
+                ).apply {
+                    addRule(RelativeLayout.ALIGN_PARENT_END)
+                    addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+                    setMargins(8, 8, 8, 8)
+                }
+                setImageResource(R.drawable.edit)
+
+                // Add click listener to replace the image
+                setOnClickListener {
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "image/*"
+                    }
+                    startActivityForResult(intent, PICK_ARTWORK_REQUEST)
+                }
+            }
+            uploadPhotoLayout.addView(editIconView)
+        } catch (e: Exception) {
+            Log.e("LibraryFragment", "Error updating upload photo with bitmap", e)
+            Toast.makeText(requireContext(), "Error displaying album art", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun saveFileToInternalStorage(uri: Uri, fileType: String): String {
@@ -352,24 +421,6 @@ class LibraryFragment : Fragment() {
                 PICK_AUDIO_REQUEST -> handleAudioResult(data)
                 PICK_ARTWORK_REQUEST -> handleArtworkResult(data)
             }
-        } else {
-            // User canceled file selection
-            when (requestCode) {
-                PICK_AUDIO_REQUEST -> {
-                    uploadStatusText.apply {
-                        text = "Audio file selection canceled"
-                        setTextColor(Color.GRAY)
-                        visibility = View.VISIBLE
-                    }
-                }
-                PICK_ARTWORK_REQUEST -> {
-                    uploadStatusText.apply {
-                        text = "Artwork selection canceled"
-                        setTextColor(Color.GRAY)
-                        visibility = View.VISIBLE
-                    }
-                }
-            }
         }
     }
 
@@ -429,15 +480,11 @@ class LibraryFragment : Fragment() {
                 requireContext().contentResolver.takePersistableUriPermission(uri, flags)
 
                 selectedArtworkUri = uri
+                // Clear the extracted album art since user selected custom artwork
+                extractedAlbumArt = null
 
                 // Update the upload photo layout with the image
                 updateUploadPhotoWithImage(uri)
-
-                // Show status message
-                uploadStatusText.apply {
-                    text = "Artwork selected successfully"
-                    visibility = View.VISIBLE
-                }
 
             } catch (e: Exception) {
                 Log.e("LibraryFragment", "Error handling artwork file", e)
@@ -481,9 +528,8 @@ class LibraryFragment : Fragment() {
                     addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
                     setMargins(8, 8, 8, 8)
                 }
-                setPadding(4, 4, 4, 4)
                 setImageResource(R.drawable.edit)
-                imageTintList = ColorStateList.valueOf(Color.WHITE)
+                setColorFilter(Color.WHITE)
 
                 // Add click listener to replace the image
                 setOnClickListener {
@@ -502,17 +548,31 @@ class LibraryFragment : Fragment() {
         }
     }
 
+    // Enhanced method to extract album art from URI
     private fun extractMetadata(uri: Uri): SongMetadata {
         val retriever = MediaMetadataRetriever()
         return try {
             retriever.setDataSource(requireContext(), uri)
 
-            // Extract metadata
+            // Extract basic metadata
             val title = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: "Unknown Title"
             val artist = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "Unknown Artist"
             val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
 
-            SongMetadata(title, artist, duration)
+            // Extract album art
+            val albumArtBytes = retriever.embeddedPicture
+            val albumArt = if (albumArtBytes != null) {
+                try {
+                    BitmapFactory.decodeByteArray(albumArtBytes, 0, albumArtBytes.size)
+                } catch (e: Exception) {
+                    Log.e("MetadataExtraction", "Error decoding album art", e)
+                    null
+                }
+            } else {
+                null
+            }
+
+            SongMetadata(title, artist, duration, albumArt)
         } catch (e: Exception) {
             Log.e("MetadataExtraction", "Error extracting metadata", e)
 
@@ -526,9 +586,13 @@ class LibraryFragment : Fragment() {
                 visibility = View.VISIBLE
             }
 
-            SongMetadata("Unknown Title", "Unknown Artist", 0L)
+            SongMetadata("Unknown Title", "Unknown Artist", 0L, null)
         } finally {
-            retriever.release()
+            try {
+                retriever.release()
+            } catch (e: Exception) {
+                Log.e("MetadataExtraction", "Error releasing retriever", e)
+            }
         }
     }
 
@@ -539,11 +603,12 @@ class LibraryFragment : Fragment() {
         return String.format("%d:%02d", minutes, seconds)
     }
 
-    // Data class to hold metadata
+    // Enhanced data class to hold metadata including album art
     data class SongMetadata(
         val title: String,
         val artist: String,
-        val duration: Long
+        val duration: Long,
+        val albumArt: Bitmap?
     )
 
     private fun setupTabButtons() {
@@ -562,6 +627,14 @@ class LibraryFragment : Fragment() {
         binding.btnLiked.setOnClickListener {
             if (currentTab != "Liked") {
                 currentTab = "Liked"
+                updateButtonStates()
+                loadLibraryData()
+            }
+        }
+
+        binding.btnDownloaded.setOnClickListener {
+            if (currentTab != "Downloaded") {
+                currentTab = "Downloaded"
                 updateButtonStates()
                 loadLibraryData()
             }
@@ -589,6 +662,15 @@ class LibraryFragment : Fragment() {
                         }
                     }
                 }
+                "Downloaded" -> {
+                    libraryViewModel.userLiked.collect { songs ->
+                        if (songs.isNotEmpty()) {
+                            injectSongs(songs)
+                        } else {
+                            showEmptyState("No downloaded songs yet")
+                        }
+                    }
+                }
             }
         }
     }
@@ -610,6 +692,15 @@ class LibraryFragment : Fragment() {
             )
             setTextColor(
                 if (currentTab == "Liked") getColor(R.color.black) else getColor(R.color.white)
+            )
+        }
+
+        binding.btnDownloaded.apply {
+            backgroundTintList = ColorStateList.valueOf(
+                if (currentTab == "Downloaded") getColor(R.color.green_spotify) else getColor(R.color.dark_gray)
+            )
+            setTextColor(
+                if (currentTab == "Downloaded") getColor(R.color.black) else getColor(R.color.white)
             )
         }
     }
@@ -648,7 +739,7 @@ class LibraryFragment : Fragment() {
                 // Get access to the album image view
                 val albumImageView = findViewById<ImageView>(R.id.libraryItemCover)
 
-                // Use our improved image loading utility
+                // Use our improved image loading utility - needs to be updated to handle custom artwork format
                 val resId = ImageUtils.loadImage(
                     requireContext(),
                     song.artworkURI,
@@ -688,39 +779,6 @@ class LibraryFragment : Fragment() {
             }
 
             librarySongsPlaceholder.addView(libraryView)
-        }
-    }
-
-    private fun getDrawableResourceFromUri(uri: String): Int {
-        // Handle different types of URIs
-        return when {
-            // For custom artwork format that we saved (custom_artwork:timestamp)
-            uri.startsWith("custom_artwork:") -> {
-                val timestamp = uri.substringAfter("custom_artwork:")
-                val filename = "$timestamp.jpg"
-
-                // Try to load the image from internal storage as a bitmap
-                // and return placeholder if it fails
-                try {
-                    // We could set a tag or use a cache here if needed
-                    // But for now, we'll just return a drawable resource
-                    // This should be enhanced to actually load from file
-                    R.drawable.logo
-                } catch (e: Exception) {
-                    Log.e("LibraryFragment", "Error loading custom artwork", e)
-                    R.drawable.logo
-                }
-            }
-            // For file:// URIs
-            uri.startsWith("file://") -> {
-                // For file:// URIs, return a placeholder or default album art resource
-                R.drawable.logo
-            }
-            // For drawable resources
-            else -> {
-                val resourceName = uri.substringAfterLast("/")
-                resources.getIdentifier(resourceName, "drawable", requireActivity().packageName)
-            }
         }
     }
 
