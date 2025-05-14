@@ -110,7 +110,7 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
             )
 
             lifecycleScope.launch {
-                val currentSongLiked = musicDBViewModel.getLikedSongById(currentSong?.id!!)
+                val currentSongLiked = musicDBViewModel.getStatusSongById(currentSong?.id!!, "like")
 //                Toast.makeText(requireContext(), "${currentSongLiked?.id} song is from like", Toast.LENGTH_SHORT).show()
                 // Now use currentSongLiked here
                 if (currentSongLiked !== null) {
@@ -217,7 +217,7 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
     private fun updateAndToggleFavoriteState() {
         val currentSongId = musicPlayerManager.currentSongInfo.value?.id
         lifecycleScope.launch {
-            val currentSongLiked = musicDBViewModel.getLikedSongById(currentSongId!!)
+            val currentSongLiked = musicDBViewModel.getStatusSongById(currentSongId!!, "like")
 //            Toast.makeText(requireContext(), "${currentSongLiked === null}", Toast.LENGTH_SHORT).show()
             // Now use currentSongLiked here
             if (currentSongLiked === null) {

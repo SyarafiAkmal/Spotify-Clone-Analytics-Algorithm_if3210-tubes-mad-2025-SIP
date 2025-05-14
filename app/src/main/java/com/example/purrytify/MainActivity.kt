@@ -79,6 +79,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun getMusicDB(): MusicDbViewModel{
+        return musicDBViewModel
+    }
+
     fun toggleMiniPlayer(show: Boolean) {
         binding.miniPlayerContainer?.visibility = if (show) View.VISIBLE else View.GONE
     }

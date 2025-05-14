@@ -158,7 +158,6 @@
                             android:id="@+id/tvSongsCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="135"
                             android:textColor="#FFFFFF"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -183,7 +182,6 @@
                             android:id="@+id/tvLikedCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="32"
                             android:textColor="#FFFFFF"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -208,7 +206,6 @@
                             android:id="@+id/tvListenedCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="50"
                             android:textColor="#FFFFFF"
                             android:textSize="18sp"
                             android:textStyle="bold" />

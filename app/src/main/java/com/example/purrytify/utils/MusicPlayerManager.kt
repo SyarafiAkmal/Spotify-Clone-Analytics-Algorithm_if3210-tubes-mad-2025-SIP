@@ -10,10 +10,13 @@ import com.example.purrytify.data.local.db.entities.SongEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.MainActivity
+import com.example.purrytify.views.MusicDbViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class MusicPlayerManager private constructor() {
     private var mediaPlayer: MediaPlayer? = null
@@ -50,6 +53,13 @@ class MusicPlayerManager private constructor() {
 
             if (context is MainActivity) {
                 context.updateRecentlyPlayedInHome(song)
+                val musicDB: MusicDbViewModel = context.getMusicDB()
+
+                context.lifecycleScope.launch {
+                    if (musicDB.getStatusSongById(song.id, "library") !== null) {
+                        musicDB.updateStatus(song, "listened")
+                    }
+                }
             }
 
             pause()

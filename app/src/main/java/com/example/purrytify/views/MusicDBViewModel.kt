@@ -81,11 +81,11 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
             }
         }
 
-    suspend fun getLikedSongById(id: Int): SongEntity? {
+    suspend fun getStatusSongById(id: Int, status: String): SongEntity? {
         return try {
-            songDao.getLikedSongById(userEmail!!, id)
+            songDao.getStatusSongById(userEmail!!, id, status)
         } catch (e: Exception) {
-            Log.e("MusicDbViewModel", "Error getting liked song: ${e.message}", e)
+            Log.e("MusicDbViewModel", "Error getting ${status} song: ${e.message}", e)
             null
         }
     }

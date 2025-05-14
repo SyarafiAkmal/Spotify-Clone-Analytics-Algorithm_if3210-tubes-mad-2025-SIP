@@ -72,9 +72,9 @@ interface SongDao {
     @Query("""
         SELECT s.* FROM song_entity AS s
         JOIN song_uploader AS su ON s.id = su.songId
-        WHERE su.uploaderEmail = :userEmail AND su.libraryStatus = 'like' AND su.songId = :id
+        WHERE su.uploaderEmail = :userEmail AND su.libraryStatus = :status AND su.songId = :id
     """)
-    suspend fun getLikedSongById(userEmail: String, id: Int): SongEntity?
+    suspend fun getStatusSongById(userEmail: String, id: Int, status: String): SongEntity?
 
     @Query("""
     SELECT COUNT(s.id) FROM song_entity AS s
