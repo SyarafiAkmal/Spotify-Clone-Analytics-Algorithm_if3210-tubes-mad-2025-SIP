@@ -19,14 +19,16 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.viewmodel.CapsuleStatsView
+import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: ProfileViewModel
+    private lateinit var profileViewModel: ProfileViewModel
     private var noConnectionView: View? = null
 
     override fun onCreateView(
@@ -35,7 +37,7 @@ class ProfileFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Initialize ViewModel
-        viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+        profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
 
         // Inflate layout
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
@@ -88,7 +90,7 @@ class ProfileFragment : Fragment() {
 
     private fun setupObservers() {
         // Observe profile picture
-        viewModel.profilePicture.observe(viewLifecycleOwner) { bitmap ->
+        profileViewModel.profilePicture.observe(viewLifecycleOwner) { bitmap ->
             if (bitmap != null) {
                 binding.profileImage.setImageBitmap(bitmap)
             } else {
@@ -98,13 +100,13 @@ class ProfileFragment : Fragment() {
         }
 
         // Observe loading state
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+        profileViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             // Show/hide loading indicator if you have one
             binding.progressBar?.isVisible = isLoading
         }
 
         // Observe errors
-        viewModel.error.observe(viewLifecycleOwner) { errorMsg ->
+        profileViewModel.error.observe(viewLifecycleOwner) { errorMsg ->
             errorMsg?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
             }
@@ -115,10 +117,9 @@ class ProfileFragment : Fragment() {
         // Get SharedPreferences
         val prefs = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
-        // Ask ViewModel to load profile data
-        viewModel.loadProfileData(prefs)
-
+        profileViewModel.loadProfileData(prefs)
         binding.profileName.text = prefs.getString("username", "")
+        loadStats()
 
         // Clear existing views
         val soundCapsulePlaceholder = binding.soundCapsule
@@ -191,6 +192,19 @@ class ProfileFragment : Fragment() {
                         .start()
                 }
                 .start()
+        }
+    }
+
+    private fun loadStats() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val songStat = binding.tvSongsCount
+            val likedStat = binding.tvLikedCount
+            val listenedStat = binding.tvListenedCount
+            val statsList: List<Int> = profileViewModel.getStats()
+
+            songStat.text = statsList.get(0).toString()
+            likedStat.text = statsList.get(1).toString()
+            listenedStat.text = statsList.get(2).toString()
         }
     }
 

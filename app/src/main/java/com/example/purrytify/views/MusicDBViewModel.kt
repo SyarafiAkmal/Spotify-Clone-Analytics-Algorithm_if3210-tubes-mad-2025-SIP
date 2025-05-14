@@ -140,6 +140,10 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    suspend fun getSongStatusCount(status: String): Int {
+        return songDao.getSongsStatusCount(userEmail!!, status)
+    }
+
     fun checkAndInsertSong(song: SongEntity) {
         viewModelScope.launch {
             try {

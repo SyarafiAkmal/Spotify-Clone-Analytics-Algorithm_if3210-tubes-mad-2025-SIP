@@ -79,9 +79,9 @@ interface SongDao {
     @Query("""
     SELECT COUNT(s.id) FROM song_entity AS s
     JOIN song_uploader AS su ON s.id = su.songId
-    WHERE su.uploaderEmail = :userEmail AND su.libraryStatus = 'listened'
+    WHERE su.uploaderEmail = :userEmail AND su.libraryStatus = :libraryStatus
     """)
-    fun getListenedSongsCount(userEmail: String): Flow<Int>
+    suspend fun getSongsStatusCount(userEmail: String, libraryStatus: String): Int
 
     @Query("SELECT id FROM song_entity WHERE title = :title AND artist = :artist")
     suspend fun getSongId(title: String, artist: String): Int
