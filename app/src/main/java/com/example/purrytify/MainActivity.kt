@@ -1,7 +1,10 @@
 package com.example.purrytify
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -14,13 +17,23 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.purrytify.databinding.ActivityMainBinding
 import com.example.purrytify.utils.MusicPlayerManager
 import android.util.Log
+import androidx.core.content.edit
+import com.example.purrytify.api.ApiClient
+import com.example.purrytify.models.Login
+import com.example.purrytify.models.RefreshToken
+import com.example.purrytify.models.Token
+import com.example.purrytify.models.VerifyToken
 import kotlinx.coroutines.launch
 import com.example.purrytify.views.MusicDbViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.example.purrytify.ui.home.HomeViewModel
 import com.example.purrytify.ui.library.LibraryViewModel
+import com.example.purrytify.ui.profile.ProfileViewModel
 import com.example.purrytify.ui.trackview.TrackViewDialogFragment
 import com.example.purrytify.utils.ImageUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,8 +41,11 @@ class MainActivity : AppCompatActivity() {
     val musicPlayerManager = MusicPlayerManager.getInstance()
     private val homeViewModel: HomeViewModel by viewModels()
     private val libraryViewModel: LibraryViewModel by viewModels()
+    private val profileViewModel: ProfileViewModel by viewModels()
     private val musicDBViewModel: MusicDbViewModel by viewModels()
     val userLibrary = MutableStateFlow<List<SongEntity>>(emptyList())
+    private val handler = Handler(Looper.getMainLooper())
+    private val checkInterval = TimeUnit.MINUTES.toMillis(3)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +60,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        handler.post(periodicChecker)
         loadInitialData()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setupLibraryObservation()
@@ -52,11 +69,47 @@ class MainActivity : AppCompatActivity() {
         setupMusicPlayer()
     }
 
+    private val periodicChecker = object : Runnable {
+        override fun run() {
+            verifyToken()
+            handler.postDelayed(this, checkInterval)
+        }
+    }
+
+    private fun verifyToken() {
+        val prefs: SharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val token: String? = prefs.getString("access_token", "")
+
+        lifecycleScope.launch {
+            val verifyToken: VerifyToken? =
+                try {
+                    ApiClient.api.verifyToken("Bearer $token")
+                } catch (e: Exception) {
+                    Log.e("TokenRefresh", "Error verifying token: ${e.message}")
+                    null
+                }
+
+
+            if (verifyToken === null) {
+                profileViewModel.logout()
+                val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                // Clear back stack so user can't go back to the app without logging in again
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                this@MainActivity.finish()
+                handler.removeCallbacks(periodicChecker)
+                Toast.makeText(applicationContext, "Session expired", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(applicationContext, "${verifyToken.valid}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun loadInitialData() {
         lifecycleScope.launch {
             val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
 
-//            Toast.makeText(this@MainActivity, "${prefs.getString("email", "none")}", Toast.LENGTH_SHORT).show()
+            musicPlayerManager.loadQueue()
             musicPlayerManager.clearCurrentSong()
         }
     }
@@ -202,6 +255,11 @@ class MainActivity : AppCompatActivity() {
     private fun setupLibraryObservation() {
         libraryViewModel.initData()
         observeLibraryChanges()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(periodicChecker)
     }
 
 }

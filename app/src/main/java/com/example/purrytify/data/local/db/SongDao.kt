@@ -58,7 +58,7 @@ interface SongDao {
         SELECT s.* FROM song_entity AS s
         JOIN song_uploader AS su ON s.id = su.songId
         WHERE su.uploaderEmail = :userEmail
-        ORDER BY s.id DESC
+        ORDER BY s.id ASC
     """)
     fun getSongsByUser(userEmail: String): Flow<List<SongEntity>>
 

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.dialog.TrackViewDialogFragment">
+    android:id="@+id/contentContainer">
 
     <!-- Linear gradient background -->
     <View
@@ -103,6 +103,19 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:padding="8dp"
         android:src="@drawable/favorited_0"
+        app:layout_constraintBottom_toBottomOf="@id/track_artist"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/track_title"
+        app:tint="@android:color/white" />
+
+    <ImageButton
+        android:id="@+id/btnDownload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="58dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@drawable/download_capsule"
         app:layout_constraintBottom_toBottomOf="@id/track_artist"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/track_title"

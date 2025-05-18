@@ -3,6 +3,8 @@ package com.example.purrytify
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AlertDialog
@@ -12,10 +14,14 @@ import com.example.purrytify.api.ApiClient
 import com.example.purrytify.databinding.ActivityLoginBinding
 import com.example.purrytify.models.Login
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
+    private val handler = Handler(Looper.getMainLooper())
+    private val checkInterval = TimeUnit.SECONDS.toMillis(10)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +56,7 @@ class LoginActivity : AppCompatActivity() {
                     putString("refresh_token", tokenResponse.refreshToken)
                 }
 
+//                Toast.makeText(this@LoginActivity, tokenResponse.accessToken, Toast.LENGTH_SHORT).show()
                 // Fetch user profile
                 val profile = ApiClient.api.getProfile("Bearer ${tokenResponse.accessToken}")
 
@@ -60,6 +67,7 @@ class LoginActivity : AppCompatActivity() {
                     putString("email", profile.email)
                     putString("profile_pict", profile.profilePhoto)
                     putString("createdAt", profile.createdAt)
+                    putString("country_code", profile.location)
                 }
 
                 // Navigate to MainActivity

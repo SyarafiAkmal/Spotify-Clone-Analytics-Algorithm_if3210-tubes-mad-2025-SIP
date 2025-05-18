@@ -77,4 +77,7 @@ dependencies {
 
     // Testing Room
     testImplementation("androidx.room:room-testing:$roomVersion")
+
+    // Image loader
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

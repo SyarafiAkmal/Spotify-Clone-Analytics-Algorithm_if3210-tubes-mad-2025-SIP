@@ -1,23 +1,22 @@
 package com.example.purrytify.utils
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import android.widget.ImageView
+import com.bumptech.glide.Glide
 import com.example.purrytify.R
 import java.io.File
-
 
 object ImageUtils {
     private const val TAG = "ImageUtils"
 
     fun loadImage(context: Context, uri: String, imageView: ImageView?): Int {
         val defaultResourceId = R.drawable.logo
-        imageView?.setImageDrawable(null)
+
+        if (imageView == null) return defaultResourceId
 
         try {
-            // Case 1: Custom artwork reference (custom_artwork:timestamp)
             if (uri.startsWith("custom_artwork:")) {
                 val timestamp = uri.substringAfter("custom_artwork:")
                 val filename = "${timestamp}.jpg"
@@ -31,7 +30,6 @@ object ImageUtils {
                 return defaultResourceId
             }
 
-            // Case 2: File URI (file://....)
             if (uri.startsWith("file://")) {
                 val filePath = uri.substring(7) // Remove "file://"
                 val file = File(filePath)
@@ -43,7 +41,15 @@ object ImageUtils {
                 return defaultResourceId
             }
 
-            // Case 3: Drawable resource reference (drawable/image_name)
+            if (uri.startsWith("http://") || uri.startsWith("https://")) {
+                Glide.with(context)
+                    .load(uri)
+                    .placeholder(defaultResourceId)
+                    .error(defaultResourceId)
+                    .into(imageView)
+                return defaultResourceId
+            }
+
             val resourceName = uri.substringAfterLast("/")
             val resId = context.resources.getIdentifier(
                 resourceName,
@@ -51,10 +57,17 @@ object ImageUtils {
                 context.packageName
             )
 
-            return if (resId != 0) resId else defaultResourceId
+            if (resId != 0) {
+                imageView.setImageResource(resId)
+                return resId
+            } else {
+                imageView.setImageResource(defaultResourceId)
+                return defaultResourceId
+            }
 
         } catch (e: Exception) {
             Log.e(TAG, "Error loading image from uri: $uri", e)
+            imageView.setImageResource(defaultResourceId)
             return defaultResourceId
         }
     }

@@ -196,4 +196,8 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    suspend fun isSongExistForUser(song: SongEntity): Boolean {
+        return songDao.isSongExistsForUser(song.title, song.artist, userEmail!!)
+    }
+
 }

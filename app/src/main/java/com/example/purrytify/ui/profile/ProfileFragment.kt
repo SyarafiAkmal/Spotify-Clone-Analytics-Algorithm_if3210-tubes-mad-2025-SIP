@@ -18,8 +18,12 @@ import com.example.purrytify.databinding.FragmentProfileBinding
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.LinearLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import com.example.purrytify.api.ApiClient
 import com.example.purrytify.viewmodel.CapsuleStatsView
 import kotlinx.coroutines.launch
 
@@ -117,8 +121,8 @@ class ProfileFragment : Fragment() {
         // Get SharedPreferences
         val prefs = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
-        profileViewModel.loadProfileData(prefs)
         binding.profileName.text = prefs.getString("username", "")
+        profileViewModel.loadProfileData(prefs)
         loadStats()
 
         // Clear existing views
@@ -212,20 +216,11 @@ class ProfileFragment : Fragment() {
         // Logout button
         binding.btnLogout.setOnClickListener {
             // Handle logout
-            val prefs = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            prefs.edit().apply {
-                putBoolean("is_logged_in", false)
-                remove("access_token")
-                remove("refresh_token")
-                remove("profile_pict")
-                apply()
-            }
-
+            profileViewModel.logout()
             Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
 
             // Navigate back to LoginActivity
             val intent = Intent(requireActivity(), LoginActivity::class.java)
-            // Clear back stack so user can't go back to the app without logging in again
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             requireActivity().finish()

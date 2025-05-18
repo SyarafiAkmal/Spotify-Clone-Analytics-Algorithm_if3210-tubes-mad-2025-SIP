@@ -1,8 +1,11 @@
 package com.example.purrytify.api
 
 import com.example.purrytify.models.Login
+import com.example.purrytify.models.OnlineSong
 import com.example.purrytify.models.Profile
+import com.example.purrytify.models.RefreshToken
 import com.example.purrytify.models.Token
+import com.example.purrytify.models.VerifyToken
 import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -23,5 +26,21 @@ interface PurrytifyAPI {
         @Path("picturePath") pictureId: String,
         @Header("Authorization") token: String
     ): ResponseBody
+
+    @GET("api/top-songs/{countryCode}")
+    suspend fun getLocalSongs(
+        @Path("countryCode") countryCode: String
+    ): List<OnlineSong>
+
+    @GET("api/top-songs/global")
+    suspend fun getGlobalSongs(): List<OnlineSong>
+
+    @GET("api/verify-token")
+    suspend fun verifyToken(
+        @Header("Authorization") token: String
+    ): VerifyToken
+
+    @POST("api/refresh-token")
+    suspend fun refreshToken(@Body refreshToken: RefreshToken): Token
 
 }

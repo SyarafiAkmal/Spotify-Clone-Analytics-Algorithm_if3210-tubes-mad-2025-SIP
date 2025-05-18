@@ -1,5 +1,7 @@
 package com.example.purrytify.ui.home
 
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
@@ -9,6 +11,9 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +21,8 @@ import com.example.purrytify.MainActivity
 import com.example.purrytify.R
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.databinding.FragmentHomeBinding
+import com.example.purrytify.ui.global.TopGlobalSongsFragment
+import com.example.purrytify.ui.global.TopLocalSongsFragment
 import com.example.purrytify.utils.ImageUtils
 import com.example.purrytify.views.AlbumItemView
 import com.example.purrytify.views.LibraryItemView
@@ -64,6 +71,25 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+
+        setupCharts()
+    }
+
+    private fun setupCharts() {
+        val topLocalSongs: LinearLayout = binding.topLocalSongs
+        val topGlobalSongs: LinearLayout = binding.topGlobalSongs
+        val prefs: SharedPreferences = requireActivity().getSharedPreferences("app_prefs", MODE_PRIVATE)
+
+        topLocalSongs.setOnClickListener {
+            TopLocalSongsFragment().show(parentFragmentManager, "local_songs_dialog")
+//            Toast.makeText(requireContext(), "${prefs.getString("country_code", "")} has ${homeViewModel.onlineLocalSongs.size} songs", Toast.LENGTH_SHORT).show()
+        }
+
+        topGlobalSongs.setOnClickListener {
+            TopGlobalSongsFragment().show(parentFragmentManager, "global_songs_dialog")
+//            Toast.makeText(requireContext(), "There is ${homeViewModel.onlineGlobalSongs.size} top global songs", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     private fun injectNewSongs(songs: List<SongEntity>) {
@@ -87,6 +113,7 @@ class HomeFragment : Fragment() {
                 setAlbumImage(resId)
                 setTitle(song.title)
                 setArtist(song.artist)
+                albumImageView.setImageResource(resId)
                 setSong(song)
 
                 val params = LinearLayout.LayoutParams(

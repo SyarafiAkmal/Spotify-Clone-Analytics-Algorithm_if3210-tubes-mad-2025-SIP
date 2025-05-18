@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".LoginActivity"
-    android:paddingTop="15dp">
+    android:paddingTop="15dp"
+    android:id="@+id/contentContainer">
 
     <!-- Player Container -->
     <androidx.core.widget.NestedScrollView
@@ -53,6 +54,7 @@
 
                     <!-- Top 50 Global -->
                     <LinearLayout
+                        android:id="@+id/topGlobalSongs"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="16dp"
@@ -65,7 +67,7 @@
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:background="@drawable/chart_background_gradient_blue"
+                                android:background="@drawable/top_global_card"
                                 android:contentDescription="Top 50 Global"
                                 android:scaleType="centerCrop" />
 
@@ -109,6 +111,7 @@
 
                     <!-- Top 50 Indonesia -->
                     <LinearLayout
+                        android:id="@+id/topLocalSongs"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
@@ -120,7 +123,7 @@
                             <ImageView
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:background="@drawable/chart_background_gradient_red"
+                                android:background="@drawable/top_local_card"
                                 android:scaleType="centerCrop" />
 
                             <TextView

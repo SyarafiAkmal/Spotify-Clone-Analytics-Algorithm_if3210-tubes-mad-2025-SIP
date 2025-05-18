@@ -35,6 +35,9 @@ class MusicPlayerManager private constructor() {
     private val _currentSongInfo = MutableStateFlow<SongEntity?>(null)
     val currentSongInfo: StateFlow<SongEntity?> = _currentSongInfo
 
+    private val _songQueue: MutableList<SongEntity> = mutableListOf()
+    val songQueue: List<SongEntity> get() = _songQueue
+
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var updateProgressTask: Runnable
 
@@ -47,17 +50,23 @@ class MusicPlayerManager private constructor() {
         }
     }
 
+    fun loadQueue() {
+//        _songQueue.
+    }
+
     fun loadSong(context: Context, song: SongEntity) {
         try {
             _currentSongId.value = song.id
 
             if (context is MainActivity) {
-                context.updateRecentlyPlayedInHome(song)
                 val musicDB: MusicDbViewModel = context.getMusicDB()
 
                 context.lifecycleScope.launch {
                     if (musicDB.getStatusSongById(song.id, "library") !== null) {
                         musicDB.updateStatus(song, "listened")
+                    }
+                    if (musicDB.isSongExistForUser(song)) {
+                        context.updateRecentlyPlayedInHome(song)
                     }
                 }
             }

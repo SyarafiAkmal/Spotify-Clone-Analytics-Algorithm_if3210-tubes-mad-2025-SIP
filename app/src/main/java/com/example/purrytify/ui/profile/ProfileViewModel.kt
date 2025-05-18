@@ -1,13 +1,17 @@
 package com.example.purrytify.ui.profile
 
 import android.app.Application
+import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.example.purrytify.api.ApiClient
 import com.example.purrytify.views.MusicDbViewModel
@@ -29,6 +33,9 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     val error: LiveData<String?> = _error
 
     private val musicDbViewModel = MusicDbViewModel(application)
+
+    private val _username = MutableLiveData<String>("")
+    val username: LiveData<String?> = _username
 
     // Function to load profile picture
     fun loadProfilePicture(pictureId: String, token: String) {
@@ -58,6 +65,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     // Function to load profile data from SharedPreferences and API
     fun loadProfileData(prefs: SharedPreferences) {
         // Get token and profile picture ID from SharedPreferences
+        // Fetch user profile
         val token = prefs.getString("access_token", "") ?: ""
         val pictureId = prefs.getString("profile_pict", "") ?: ""
 
@@ -66,6 +74,24 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         } else {
             _error.value = "Missing profile data. Please log in again."
         }
+    }
+
+    fun logout() {
+        val prefs = application.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        prefs.edit().apply {
+            putBoolean("is_logged_in", false)
+            remove("access_token")
+            remove("refresh_token")
+            remove("profile_pict")
+            remove("user_id")
+            remove("username")
+            remove("email")
+            remove("profile_pict")
+            remove("createdAt")
+            remove("country_code")
+            apply()
+        }
+
     }
 
     suspend fun getStats(): List<Int>{

@@ -1,13 +1,18 @@
 package com.example.purrytify.ui.home
 
 import android.app.Application
+import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
+import com.example.purrytify.api.ApiClient
 import com.example.purrytify.data.local.db.entities.SongEntity
+import com.example.purrytify.models.OnlineSong
 import com.example.purrytify.views.MusicDbViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,14 +25,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val userAllSongs: StateFlow<List<SongEntity>> = _userAllSongs.asStateFlow()
     private val musicDbViewModel = MusicDbViewModel(application)
     private var packageName: String = "com.example.purrytify"
-    private var userData: SharedPreferences? = null
+    private val _onlineLocalSongs = mutableListOf<OnlineSong>()
+    val onlineLocalSongs: List<OnlineSong> get() = _onlineLocalSongs
+    private val _onlineGlobalSongs = mutableListOf<OnlineSong>()
+    val onlineGlobalSongs: List<OnlineSong> get() = _onlineGlobalSongs
+
 
     fun setPackageName(pkgName: String) {
         packageName = pkgName
-    }
-
-    fun setUserData(user: SharedPreferences) {
-        userData = user
     }
 
     fun addToRecentPlayed(song: SongEntity) {
@@ -44,22 +49,28 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun initData() {
         viewModelScope.launch {
             try {
-                Log.d("HomeViewModel", "Attempting to initialize data")
+                launch {
+                    val sharedPrefs: SharedPreferences = application.getSharedPreferences("app_prefs", MODE_PRIVATE)
+                    val onlineSongLocal: List<OnlineSong> = ApiClient.api.getLocalSongs(sharedPrefs.getString("country_code", "")!!)
+                    val onlineSongGlobal: List<OnlineSong> = ApiClient.api.getGlobalSongs()
+
+                    _onlineLocalSongs.clear()
+                    _onlineLocalSongs.addAll(onlineSongLocal)
+                    _onlineGlobalSongs.clear()
+                    _onlineGlobalSongs.addAll(onlineSongGlobal)
+                }
 
                 launch {
                     musicDbViewModel.allSongs.take(1).collect { songs ->
                         _userAllSongs.value = songs.take(10)
-                        Log.d("HomeViewModel", "Home All songs: ${songs.size}")
-                        songs.forEach{ song ->
-                            Log.d("HomeViewModel", "Title-id: ${song.title}-${song.id}")
-                        }
+//                        Log.d("HomeViewModel", "Home All songs: ${songs.size}")
                     }
                 }
 
                 launch {
                     musicDbViewModel.recentSongs.take(1).collect { songs ->
                         _userRecentPlayed.value = songs.take(10)
-                        Log.d("HomeViewModel", "Home Recent songs: ${songs.size}")
+//                        Log.d("HomeViewModel", "Home Recent songs: ${songs.size}")
                     }
                 }
 

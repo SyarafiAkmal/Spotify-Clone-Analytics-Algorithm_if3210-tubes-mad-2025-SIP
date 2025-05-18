@@ -31,7 +31,7 @@ class AlbumItemView @JvmOverloads constructor(
         orientation = VERTICAL
     }
 
-    fun setAlbumImage(@DrawableRes imageResId: Int) {
+    fun setAlbumImage(imageResId: Int) {
         albumImageView.setImageResource(imageResId)
     }
 

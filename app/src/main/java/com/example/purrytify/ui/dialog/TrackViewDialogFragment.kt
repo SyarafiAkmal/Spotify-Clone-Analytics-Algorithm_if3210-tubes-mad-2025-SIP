@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.R
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.databinding.FragmentTrackViewBinding
+import com.example.purrytify.ui.dialog.DialogViewModel
 import com.example.purrytify.ui.home.HomeViewModel
 import com.example.purrytify.ui.library.LibraryViewModel
 import com.example.purrytify.utils.ImageUtils
@@ -34,6 +35,7 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var libraryViewModel: LibraryViewModel
     private lateinit var musicDBViewModel: MusicDbViewModel
+    private lateinit var dialogViewModel: DialogViewModel
     private val allSongs = MutableStateFlow<List<SongEntity>>(emptyList())
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -68,6 +70,7 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
         homeViewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
         libraryViewModel = ViewModelProvider(requireActivity())[LibraryViewModel::class.java]
         musicDBViewModel = ViewModelProvider(requireActivity())[MusicDbViewModel::class.java]
+        dialogViewModel = ViewModelProvider(this)[DialogViewModel::class.java]
         return binding.root
     }
 
@@ -78,7 +81,7 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
         loadSongs()
 
         setupUI()
-        setupBackButton()
+        setupButtons()
         observeMusicState()
         setupSeekBar()
         setupPlaybackControls()
@@ -86,7 +89,7 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
 
     private fun loadSongs() {
         viewLifecycleOwner.lifecycleScope.launch {
-            homeViewModel.userAllSongs.collect { songs ->
+            musicDBViewModel.allSongs.collect { songs ->
                 if (songs.isNotEmpty()) {
                     allSongs.value = songs
                 }
@@ -94,9 +97,32 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun setupBackButton() {
+    private fun setupButtons() {
         binding.btnBack.setOnClickListener {
             dismiss()
+        }
+
+        binding.btnDownload.setOnClickListener {
+//            Toast.makeText(requireContext(), "${musicPlayerManager.currentSongInfo.value?.title}", Toast.LENGTH_SHORT).show()
+            val currentSong: SongEntity = musicPlayerManager.currentSongInfo.value!!
+            viewLifecycleOwner.lifecycleScope.launch {
+                if (musicDBViewModel.isSongExistForUser(currentSong)) {
+                    Toast.makeText(requireContext(), "Song is already downloaded", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "Downloading..", Toast.LENGTH_SHORT).show()
+                    val audioUrl = currentSong.uri
+                    val artworkUrl = currentSong.artworkURI
+
+                    dialogViewModel.downloadSong(
+                        requireContext(),
+                        currentSong,
+                        audioUrl,
+                        artworkUrl,
+                        musicDBViewModel
+                    )
+                }
+            }
+
         }
     }
 
@@ -207,10 +233,6 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
         binding.btnFavorite.setOnClickListener {
 //            Toast.makeText(requireContext(), "Favorite toggled", Toast.LENGTH_SHORT).show()
             updateAndToggleFavoriteState()
-        }
-
-        binding.btnMore.setOnClickListener {
-            Toast.makeText(requireContext(), "More options", Toast.LENGTH_SHORT).show()
         }
     }
 
