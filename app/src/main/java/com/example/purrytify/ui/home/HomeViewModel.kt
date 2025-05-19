@@ -50,17 +50,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 launch {
-                    val sharedPrefs: SharedPreferences = application.getSharedPreferences("app_prefs", MODE_PRIVATE)
-                    val onlineSongLocal: List<OnlineSong> = ApiClient.api.getLocalSongs(sharedPrefs.getString("country_code", "")!!)
-                    val onlineSongGlobal: List<OnlineSong> = ApiClient.api.getGlobalSongs()
-
-                    _onlineLocalSongs.clear()
-                    _onlineLocalSongs.addAll(onlineSongLocal)
-                    _onlineGlobalSongs.clear()
-                    _onlineGlobalSongs.addAll(onlineSongGlobal)
-                }
-
-                launch {
                     musicDbViewModel.allSongs.take(1).collect { songs ->
                         _userAllSongs.value = songs.take(10)
 //                        Log.d("HomeViewModel", "Home All songs: ${songs.size}")
