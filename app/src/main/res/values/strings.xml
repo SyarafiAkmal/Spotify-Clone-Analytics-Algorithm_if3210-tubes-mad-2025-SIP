@@ -3,4 +3,13 @@
     <string name="title_home">Home</string>
     <string name="title_library">Your Library</string>
     <string name="title_profile">Profile</string>
+    <string-array name="countries">
+        <item>Indonesia</item>
+        <item>Malaysia</item>
+        <item>USA</item>
+        <item>UK</item>
+        <item>Switzerland</item>
+        <item>Germany</item>
+        <item>Brazil</item>
+    </string-array>
 </resources>

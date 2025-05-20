@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.example.purrytify.api.ApiClient
+import com.example.purrytify.models.Profile
 import com.example.purrytify.views.MusicDbViewModel
 import kotlinx.coroutines.launch
 import java.lang.Exception
@@ -36,6 +37,29 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
     private val _username = MutableLiveData<String>("")
     val username: LiveData<String?> = _username
+
+    private val _country = MutableLiveData<String>("")
+    val country: LiveData<String?> = _country
+
+    val countriesMap = mapOf(
+        "ID" to "Indonesia",
+        "MY" to "Malaysia",
+        "US" to "USA",
+        "GB" to "UK",
+        "CH" to "Switzerland",
+        "DE" to "Germany",
+        "BR" to "Brazil"
+    )
+
+    val reversedCountriesMap = mapOf(
+        "Indonesia" to "ID",
+        "Malaysia" to "MY",
+        "USA" to "US",
+        "UK" to "GB",
+        "Switzerland" to "CH",
+        "Germany" to "DE",
+        "Brazil" to "BR"
+    )
 
     // Function to load profile picture
     fun loadProfilePicture(pictureId: String, token: String) {
@@ -67,12 +91,17 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         // Get token and profile picture ID from SharedPreferences
         // Fetch user profile
         val token = prefs.getString("access_token", "") ?: ""
-        val pictureId = prefs.getString("profile_pict", "") ?: ""
 
-        if (token.isNotEmpty() && pictureId.isNotEmpty()) {
-            loadProfilePicture(pictureId, token)
-        } else {
-            _error.value = "Missing profile data. Please log in again."
+        viewModelScope.launch {
+            val profile: Profile = ApiClient.api.getProfile("Bearer ${prefs.getString("access_token", "")}")
+
+            if (token.isNotEmpty() && profile.profilePhoto.isNotEmpty()) {
+                loadProfilePicture(profile.profilePhoto, token)
+                _country.value = countriesMap[profile.location]
+                _username.value = profile.username
+            } else {
+                _error.value = "Missing profile data. Please log in again."
+            }
         }
     }
 

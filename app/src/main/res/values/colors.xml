@@ -11,4 +11,5 @@
     <color name="bottom_nav_inactive">#B3B3B3</color>
     <color name="green_spotify">#1DB954</color>
     <color name="dark_gray">#212121</color>
+    <color name="transparent">#00000000</color>
 </resources>

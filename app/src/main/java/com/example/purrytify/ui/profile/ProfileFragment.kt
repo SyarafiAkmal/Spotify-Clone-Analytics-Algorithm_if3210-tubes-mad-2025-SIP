@@ -1,6 +1,7 @@
 package com.example.purrytify.ui.profile
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -18,13 +19,19 @@ import com.example.purrytify.databinding.FragmentProfileBinding
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.LinearLayout
+import androidx.core.content.edit
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.api.ApiClient
+import com.example.purrytify.ui.global.TopGlobalSongsFragment
 import com.example.purrytify.viewmodel.CapsuleStatsView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
@@ -51,6 +58,11 @@ class ProfileFragment : Fragment() {
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setFragmentResultListener("profile_updated") { _, _ ->
+            // Reload profile data when update happens
+            loadProfileData()
+        }
 
         // Check network connectivity first
         checkNetworkAndLoadProfile()
@@ -121,8 +133,30 @@ class ProfileFragment : Fragment() {
         // Get SharedPreferences
         val prefs = requireActivity().getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
-        binding.profileName.text = prefs.getString("username", "")
+        viewLifecycleOwner.lifecycleScope.launch {
+            val profile = ApiClient.api.getProfile("Bearer ${prefs.getString("access_token", "")}")
+
+            // Refresh Session Profile data
+            prefs.edit().apply {
+                remove("profile_pict")
+                remove("country_code")
+                apply()
+            }
+
+            Toast.makeText(requireContext(), "${profile.location}", Toast.LENGTH_SHORT).show()
+            prefs.edit {
+                putString("profile_pict", profile.profilePhoto)
+                putString("country_code", profile.location)
+            }
+        }
+
         profileViewModel.loadProfileData(prefs)
+        profileViewModel.username.observe(viewLifecycleOwner) { username ->
+            binding.profileName.text = username
+        }
+        profileViewModel.country.observe(viewLifecycleOwner) { country ->
+            binding.profileFrom.text = country
+        }
         loadStats()
 
         // Clear existing views
@@ -227,7 +261,7 @@ class ProfileFragment : Fragment() {
         }
 
         binding.btnEditProfile?.setOnClickListener {
-            Toast.makeText(requireContext(), "Tombol edit dipencet", Toast.LENGTH_SHORT).show()
+            EditProfileFragment().show(parentFragmentManager, "edit_profile_dialog")
         }
     }
 

@@ -1,5 +1,7 @@
 package com.example.purrytify.models
 
+import okhttp3.MultipartBody
+
 data class Profile (
     val id: Int,
     val username: String,
@@ -20,9 +22,18 @@ data class Token (
     val refreshToken: String
 )
 
+data class Message (
+    val message: String
+)
+
 data class User (
     val id: Int,
     val username: String
+)
+
+data class EditProfile (
+    val location: String? = null,
+    val profilePhoto: MultipartBody.Part? = null
 )
 
 data class VerifyToken (

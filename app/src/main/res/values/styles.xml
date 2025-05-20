@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <style name="CustomOutlinedDropdown" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxStrokeColor">#FFFFFF</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="hintTextColor">#535353</item>
+        <item name="endIconTint">#535353</item>
+        <item name="startIconTint">#535353</item>
+    </style>
+</resources>

@@ -25,11 +25,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val userAllSongs: StateFlow<List<SongEntity>> = _userAllSongs.asStateFlow()
     private val musicDbViewModel = MusicDbViewModel(application)
     private var packageName: String = "com.example.purrytify"
-    private val _onlineLocalSongs = mutableListOf<OnlineSong>()
-    val onlineLocalSongs: List<OnlineSong> get() = _onlineLocalSongs
-    private val _onlineGlobalSongs = mutableListOf<OnlineSong>()
-    val onlineGlobalSongs: List<OnlineSong> get() = _onlineGlobalSongs
-
 
     fun setPackageName(pkgName: String) {
         packageName = pkgName
