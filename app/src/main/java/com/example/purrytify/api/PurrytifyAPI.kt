@@ -52,4 +52,7 @@ interface PurrytifyAPI {
         @Body editProfile: EditProfile,
         @Header ("Authorization") token: String
     ): Response<Message>
+
+    @GET("/api/songs/{id}")
+    suspend fun getSongById(@Path("id") id: Int): OnlineSong
 }

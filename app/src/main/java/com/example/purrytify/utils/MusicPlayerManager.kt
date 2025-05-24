@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.MainActivity
+import com.example.purrytify.models.OnlineSong
 import com.example.purrytify.views.MusicDbViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -149,6 +150,28 @@ class MusicPlayerManager private constructor() {
             return instance ?: synchronized(this) {
                 instance ?: MusicPlayerManager().also { instance = it }
             }
+        }
+    }
+
+    fun onlineToEntity(onlineSong: OnlineSong): SongEntity {
+        return SongEntity(
+            id = onlineSong.id,
+            title = onlineSong.title,
+            artist = onlineSong.artist,
+            artworkURI =  onlineSong.artwork,
+            uri = onlineSong.url,
+            duration = parseDurationToMillis(onlineSong.duration)
+        )
+    }
+
+    private fun parseDurationToMillis(durationString: String): Long {
+        val parts = durationString.split(":")
+        return try {
+            val minutes = parts[0].toIntOrNull() ?: 0
+            val seconds = parts.getOrNull(1)?.toIntOrNull() ?: 0
+            (minutes * 60 + seconds) * 1000L
+        } catch (e: Exception) {
+            0L
         }
     }
 }

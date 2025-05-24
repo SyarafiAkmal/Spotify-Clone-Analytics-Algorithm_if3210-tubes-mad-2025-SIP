@@ -1,7 +1,9 @@
 package com.example.purrytify.ui.trackview
 
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +14,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.R
+import com.example.purrytify.api.ApiClient
+import com.example.purrytify.api.PurrytifyAPI
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.databinding.FragmentTrackViewBinding
 import com.example.purrytify.ui.dialog.DialogViewModel
@@ -27,6 +31,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import java.io.IOException
+import retrofit2.HttpException
 
 class TrackViewDialogFragment : BottomSheetDialogFragment() {
     private lateinit var binding: FragmentTrackViewBinding
@@ -36,6 +42,7 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
     private lateinit var libraryViewModel: LibraryViewModel
     private lateinit var musicDBViewModel: MusicDbViewModel
     private lateinit var dialogViewModel: DialogViewModel
+    private lateinit var purrytifyAPI: PurrytifyAPI
     private val allSongs = MutableStateFlow<List<SongEntity>>(emptyList())
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -71,20 +78,49 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
         libraryViewModel = ViewModelProvider(requireActivity())[LibraryViewModel::class.java]
         musicDBViewModel = ViewModelProvider(requireActivity())[MusicDbViewModel::class.java]
         dialogViewModel = ViewModelProvider(this)[DialogViewModel::class.java]
+        purrytifyAPI = ApiClient.api
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Load songs from HomeViewModel
-        loadSongs()
+        val targetSongId = arguments?.getInt("song_id")
+        Log.d("TrackViewDialog", "Received songId: $targetSongId")
+
+        if (targetSongId != null) {
+            fetchAndPlaySong(targetSongId)
+        } else {
+            Toast.makeText(requireContext(), "No song ID provided", Toast.LENGTH_SHORT).show()
+        }
 
         setupUI()
         setupButtons()
         observeMusicState()
         setupSeekBar()
         setupPlaybackControls()
+    }
+
+    private fun fetchAndPlaySong(songId: Int) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val onlineSong = purrytifyAPI.getSongById(songId)
+                val songEntity = musicPlayerManager.onlineToEntity(onlineSong)
+
+                Log.d("TrackViewDialog", "Fetched song: ${songEntity.title}")
+                MusicPlayerManager.getInstance().loadSong(requireContext(), songEntity)
+
+            } catch (e: retrofit2.HttpException) {
+                Log.e("TrackViewDialog", "HTTP error fetching song", e)
+                Toast.makeText(requireContext(), "Song not found on server", Toast.LENGTH_SHORT).show()
+            } catch (e: IOException) {
+                Log.e("TrackViewDialog", "Network error fetching song", e)
+                Toast.makeText(requireContext(), "Network error", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Log.e("TrackViewDialog", "Unknown error", e)
+                Toast.makeText(requireContext(), "Failed to load song", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun loadSongs() {
@@ -122,7 +158,25 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
                     )
                 }
             }
+        }
 
+        binding.btnShare.setOnClickListener {
+            val currentSong = musicPlayerManager.currentSongInfo.value
+            if (currentSong != null) {
+                val deepLink = "purrytify://song/${currentSong.id}"
+                val shareText = "Listen to \"${currentSong.title}\" by ${currentSong.artist} on Purrytify!\n$deepLink"
+
+                val sendIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, shareText)
+                    type = "text/plain"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, "Share song via")
+                startActivity(shareIntent)
+            } else {
+                Toast.makeText(requireContext(), "No song is playing", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

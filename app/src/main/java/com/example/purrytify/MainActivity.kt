@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handleDeepLink(intent)
 
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         val isLoggedIn = prefs.getBoolean("is_logged_in", false)
@@ -260,6 +261,34 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(periodicChecker)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    private fun handleDeepLink(intent: Intent?) {
+        val data = intent?.data
+        if (data != null && data.scheme == "purrytify" && data.host == "song") {
+            val songId = data.lastPathSegment?.toIntOrNull()
+            if (songId != null) {
+                // Navigate to the player or load the song using songId
+                openTrackViewDialog(songId)
+            } else {
+                Toast.makeText(this@MainActivity, "Invalid song ID", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun openTrackViewDialog(songId: Int) {
+        val fragment = TrackViewDialogFragment()
+
+        // Optional: set songId as argument to the fragment if needed
+        val bundle = Bundle().apply { putInt("song_id", songId) }
+        fragment.arguments = bundle
+
+        fragment.show(supportFragmentManager, "trackView")
     }
 
 }
