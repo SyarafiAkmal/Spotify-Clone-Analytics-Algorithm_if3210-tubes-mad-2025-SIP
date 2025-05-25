@@ -1,7 +1,10 @@
 package com.example.purrytify
 
+import android.app.Activity
 import android.content.Intent
+import android.Manifest
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -17,6 +20,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.purrytify.databinding.ActivityMainBinding
 import com.example.purrytify.utils.MusicPlayerManager
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.example.purrytify.api.ApiClient
 import com.example.purrytify.models.Login
@@ -48,6 +54,13 @@ class MainActivity : AppCompatActivity() {
     val userLibrary = MutableStateFlow<List<SongEntity>>(emptyList())
     private val handler = Handler(Looper.getMainLooper())
     private val checkInterval = TimeUnit.MINUTES.toMillis(3)
+    private val qrScanLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+        }
+    }
+
+    private val CAMERA_PERMISSION_REQUEST_CODE = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -207,6 +220,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        binding.btnScanQr.setOnClickListener {
+            checkCameraPermissionAndOpenScanner()
+        }
+
         binding.addToLibrary?.setOnClickListener {
             val currentSong = musicPlayerManager.currentSongInfo.value
             currentSong?.let { song ->
@@ -266,6 +283,26 @@ class MainActivity : AppCompatActivity() {
         binding.playButton?.setImageResource(
             if (isPlaying) R.drawable.pause else R.drawable.play
         )
+    }
+
+    private fun checkCameraPermissionAndOpenScanner() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED) {
+            // Permission not granted, request it
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST_CODE
+            )
+        } else {
+            // Permission already granted, open scanner
+            openQRScanner()
+        }
+    }
+
+    private fun openQRScanner() {
+        val intent = Intent(this, QRScannerActivity::class.java)
+        qrScanLauncher.launch(intent)
     }
 
 //    private fun addSongToLibrary(song: SongEntity) {
