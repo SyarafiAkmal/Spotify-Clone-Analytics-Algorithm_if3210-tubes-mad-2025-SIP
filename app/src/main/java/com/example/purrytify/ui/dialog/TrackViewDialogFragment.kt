@@ -1,7 +1,6 @@
 package com.example.purrytify.ui.trackview
 
 import android.app.Dialog
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,10 +9,10 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.SeekBar
 import android.widget.Toast
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.R
+import com.example.purrytify.views.ShareSheet
 import com.example.purrytify.api.ApiClient
 import com.example.purrytify.api.PurrytifyAPI
 import com.example.purrytify.data.local.db.entities.SongEntity
@@ -28,11 +27,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.io.IOException
-import retrofit2.HttpException
 
 class TrackViewDialogFragment : BottomSheetDialogFragment() {
     private lateinit var binding: FragmentTrackViewBinding
@@ -90,8 +86,6 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
 
         if (targetSongId != null) {
             fetchAndPlaySong(targetSongId)
-        } else {
-            Toast.makeText(requireContext(), "No song ID provided", Toast.LENGTH_SHORT).show()
         }
 
         setupUI()
@@ -164,16 +158,8 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
             val currentSong = musicPlayerManager.currentSongInfo.value
             if (currentSong != null) {
                 val deepLink = "purrytify://song/${currentSong.id}"
-                val shareText = "Listen to \"${currentSong.title}\" by ${currentSong.artist} on Purrytify!\n$deepLink"
-
-                val sendIntent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, shareText)
-                    type = "text/plain"
-                }
-
-                val shareIntent = Intent.createChooser(sendIntent, "Share song via")
-                startActivity(shareIntent)
+                val sheet = ShareSheet(deepLink)
+                sheet.show(parentFragmentManager, "Sharesheet")
             } else {
                 Toast.makeText(requireContext(), "No song is playing", Toast.LENGTH_SHORT).show()
             }
