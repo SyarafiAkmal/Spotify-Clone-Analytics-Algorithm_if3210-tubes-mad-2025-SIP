@@ -35,6 +35,7 @@ import okhttp3.Dispatcher
 import java.lang.Exception
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.concurrent.TimeUnit
 
@@ -178,31 +179,35 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
                 // Get capsules from DB
                 musicDbViewModel.getUserCapsules()?.forEach { capsule ->
-                    val topSongsList: MutableList<SongEntity> = mutableListOf()
-                    val topArtistsList: MutableList<ArtistEntity> = mutableListOf()
+                    val capsuleDate: String = OffsetDateTime.parse(capsule.capsuleDate).format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+                    val currentDate: String = OffsetDateTime.parse(DateTimeUtils.getCurrentTimeIso()).format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+                    if (capsuleDate !== currentDate) {
+                        val topSongsList: MutableList<SongEntity> = mutableListOf()
+                        val topArtistsList: MutableList<ArtistEntity> = mutableListOf()
 
-                    capsule.topSongs.split(",").forEach { songId ->
-                        topSongsList.add(musicDbViewModel.getSongById(songId.toInt())!!)
-                    }
+                        capsule.topSongs.split(",").forEach { songId ->
+                            topSongsList.add(musicDbViewModel.getSongById(songId.toInt())!!)
+                        }
 
-                    capsule.topArtists.split(",").forEach { artist ->
-                        topArtistsList.add(ArtistEntity(
-                            artistId = 0,
-                            artistName = artist,
-                            artistPicture = musicDbViewModel.getArtistPicture(artist)
-                        ))
-                    }
+                        capsule.topArtists.split(",").forEach { artist ->
+                            topArtistsList.add(ArtistEntity(
+                                artistId = 0,
+                                artistName = artist,
+                                artistPicture = musicDbViewModel.getArtistPicture(artist)
+                            ))
+                        }
 
-                    val capsule: CapsuleStatsView = CapsuleStatsView(application.applicationContext, capsule = capsule, topSongsList = topSongsList, topArtistsList = topArtistsList).apply {
-                        setMonthYear()
-                        setMinutes()
-                        setTopArtist()
-                        setTopSong()
-                        val streakSong: SongEntity? = musicDbViewModel.getSongById(capsule.songStreakId)
-                        setStreakInfo(streakSong)
-                        setStreakImage(streakSong)
+                        val capsule: CapsuleStatsView = CapsuleStatsView(application.applicationContext, capsule = capsule, topSongsList = topSongsList, topArtistsList = topArtistsList).apply {
+                            setMonthYear()
+                            setMinutes()
+                            setTopArtist()
+                            setTopSong()
+                            val streakSong: SongEntity? = musicDbViewModel.getSongById(capsule.songStreakId)
+                            setStreakInfo(streakSong)
+                            setStreakImage(streakSong)
+                        }
+                        _userCapsule.value = _userCapsule.value + capsule
                     }
-                    _userCapsule.value = _userCapsule.value + capsule
                 }
             }
         }

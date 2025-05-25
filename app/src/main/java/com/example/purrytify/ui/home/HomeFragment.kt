@@ -125,7 +125,9 @@ class HomeFragment : Fragment() {
                         )
                     })
 
-                    val likedArtist: List<String> = songs.map { it.artist.split(", ").get(0) }
+                    val likedArtist: List<String> = songs
+                        .flatMap { it.artist.split(", ").map { name -> name.trim() } }
+                        .distinct()
 
                     val recSongs: MutableList<SongEntity> = mutableListOf()
 
@@ -133,6 +135,15 @@ class HomeFragment : Fragment() {
 
                     recSongs.addAll(
                         serverSongs
+                            .filter { song ->
+                                song.id !in userSongIds &&
+                                        likedArtist.any { liked -> song.artist.contains(liked, ignoreCase = true) }
+                            }
+                            .distinctBy { it.id }.distinctBy { it.title }
+                    )
+
+                    recSongs.addAll(
+                        homeViewModel.userAllSongs.value
                             .filter { song ->
                                 song.id !in userSongIds &&
                                         likedArtist.any { liked -> song.artist.contains(liked, ignoreCase = true) }
