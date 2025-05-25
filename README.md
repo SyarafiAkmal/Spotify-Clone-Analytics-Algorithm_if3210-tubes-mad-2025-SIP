@@ -14,9 +14,13 @@ Kini, misi besar dimulai. Mampukah kamu, sebagai agen rahasia O.W.C.A., membantu
 | ------------ | -------------------------------------------------------------- |
 | Loading      | <img src="screenshots/loading.png" alt="loading" width="200"/> |
 | Login        | <img src="screenshots/login.png" alt="login" width="200"/>     |
-| Home         | <img src="screenshots/home.png" alt="Home" width="200"/>       |
-| Your Library | <img src="screenshots/library.png" alt="Library" width="200"/> |
-| Profile      | <img src="screenshots/profile.png" alt="profile" width="200"/> |
+| Home         | ![home_screen](https://github.com/user-attachments/assets/2418e4a4-509d-4e57-9fd0-b74320e8e4c3) |
+| Your Library | ![librarysong](https://github.com/user-attachments/assets/20070ea6-0446-40a8-861d-0b6c0ac020e8) |
+| Profile      | ![profilesong](https://github.com/user-attachments/assets/2536f754-97d5-48ab-9502-31d8c526736a) |
+| Capsule      | ![capsulesong](https://github.com/user-attachments/assets/9435c3b8-49d6-4b6b-a1d9-c692f91e22f2) |
+| Upload      | ![uploadsong](https://github.com/user-attachments/assets/7545a02a-48b7-4efa-9482-14f3eb8cb5af) |
+| Global Songs      | ![globalsong](https://github.com/user-attachments/assets/6bcd31a9-5468-4895-9d03-4856bc3bf75a) |
+| Local Songs      | ![localsong](https://github.com/user-attachments/assets/d922354c-c4a4-42f9-80e7-3171bd6228a7) |
 
 ## 🕹️ Library
 
@@ -24,6 +28,14 @@ Kini, misi besar dimulai. Mampukah kamu, sebagai agen rahasia O.W.C.A., membantu
 
 ## 💻 Developers
 
+### Milestone 1
+| Name                                                                 | Features                                                                                                                    | Exploration hours | Working Hours |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------- | ------------- |
+| [Ibrahim Ihsan Rasyid - 13522018](https://github.com/ibrahim-rasyid) | Network sensing, Profile Fragment                                                                                           | 6                 | 20            |
+| [Amalia Putri - 13522042](https://github.com/amaliap21)              | Loading, Login, Home, Profile, Time Listened, Top Artists, Top Songs, Share Day Streak, Share Sound Capsule, Responsiveness, edit profile | 10                 | 35            |
+| [Muhammad Syarafi Akmal - 13522076](https://github.com/SyarafiAkmal) | Almost all of the features                                                                                                  | 10                | 35            |
+
+### Milestone 2
 | Name                                                                 | Features                                                                                                                    | Exploration hours | Working Hours |
 | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------- | ------------- |
 | [Ibrahim Ihsan Rasyid - 13522018](https://github.com/ibrahim-rasyid) | Network sensing, Profile Fragment                                                                                           | 6                 | 20            |
