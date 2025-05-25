@@ -26,13 +26,19 @@ import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.application
 import androidx.lifecycle.lifecycleScope
+import com.example.purrytify.MainActivity
 import com.example.purrytify.api.ApiClient
+import com.example.purrytify.data.local.db.entities.ArtistEntity
+import com.example.purrytify.data.local.db.entities.SongActivity
+import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.ui.global.TopGlobalSongsFragment
 import com.example.purrytify.viewmodel.CapsuleStatsView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 class ProfileFragment : Fragment() {
 
@@ -143,7 +149,7 @@ class ProfileFragment : Fragment() {
                 apply()
             }
 
-            Toast.makeText(requireContext(), "${profile.location}", Toast.LENGTH_SHORT).show()
+//            Toast.makeText(requireContext(), "${profile.location}", Toast.LENGTH_SHORT).show()
             prefs.edit {
                 putString("profile_pict", profile.profilePhoto)
                 putString("country_code", profile.location)
@@ -163,74 +169,53 @@ class ProfileFragment : Fragment() {
         val soundCapsulePlaceholder = binding.soundCapsule
 
         // Create and add April capsule
-        val aprilCapsule = CapsuleStatsView(requireContext()).apply {
-            setMonthYear("April 2025")
-            setMinutes(862)
-            setTopArtist("The Beatles")
-            setTopSong("Starboy")
-            setStreakInfo(5, "Loose", "Daniel Caesar", "Apr 21", "Apr 25")
-            setStreakImage(R.drawable.loose)
 
-            // Set click listeners
-            setOnTimeListenedClickListener {
-                Toast.makeText(requireContext(), "Time listened details", Toast.LENGTH_SHORT).show()
+        profileViewModel.currentMonthCapsule.observe(viewLifecycleOwner) { capsuleEntity ->
+            if (capsuleEntity != null) {
+                lifecycleScope.launch {
+                    // Use capsuleEntity instead of .value to avoid null issues
+                    val streakSong: SongEntity? = if (capsuleEntity.songStreakId != null) {
+                        profileViewModel.musicDbViewModel.getSongById(capsuleEntity.songStreakId)
+                    } else {
+                        null
+                    }
+
+                    val topSongs = profileViewModel.musicDbViewModel.getTopSongs()
+
+                    val topArtists: List<ArtistEntity> = topSongs.map { song ->
+                        ArtistEntity(
+                            artistId = 0,
+                            artistName = song.artist, // Use song.artist instead of splitting title
+                            artistPicture = song.artworkURI
+                        )
+                    }
+
+                    // Use capsuleEntity parameter, not .value
+                    val currentMonthCapsule = CapsuleStatsView(
+                        requireContext(),
+                        capsule = capsuleEntity, // Use the parameter
+                        topSongsList = topSongs,
+                        topArtistsList = topArtists
+                    ).apply {
+                        setMonthYear()
+                        setMinutes()
+                        setTopArtist()
+                        setTopSong()
+                        setStreakInfo(streakSong)
+                        setStreakImage(streakSong)
+                    }
+
+                    // Add to your layout
+                    soundCapsulePlaceholder.removeAllViews()
+                    soundCapsulePlaceholder.addView(currentMonthCapsule)
+                }
             }
-
-            setOnTopArtistClickListener {
-                Toast.makeText(requireContext(), "Artist: The Beatles", Toast.LENGTH_SHORT).show()
-            }
-
-            setOnTopSongClickListener {
-                Toast.makeText(requireContext(), "Song: Starboy", Toast.LENGTH_SHORT).show()
-            }
-
-            setOnShareClickListener {
-                Toast.makeText(requireContext(), "Sharing...", Toast.LENGTH_SHORT).show()
-            }
-
-            // Set layout params if needed
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            params.bottomMargin = resources.getDimensionPixelSize(R.dimen.margin_medium)
-            layoutParams = params
         }
 
-        // Create and add March capsule
-        val marchCapsule = CapsuleStatsView(requireContext()).apply {
-            setMonthYear("March 2025")
-            setMinutes(601)
-            setTopArtist("Doechii")
-            setTopSong("Nights")
-
-            // Set layout params
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            layoutParams = params
-
-            // Add similar click listeners if needed
-        }
 
         // Add views to container
-        soundCapsulePlaceholder.addView(aprilCapsule)
-        soundCapsulePlaceholder.addView(marchCapsule)
-
-        // Add animation effects similar to your LibraryItemView if desired
-        aprilCapsule.setOnClickListener {
-            aprilCapsule.animate()
-                .alpha(0.9f)
-                .setDuration(100)
-                .withEndAction {
-                    aprilCapsule.animate()
-                        .alpha(1f)
-                        .setDuration(100)
-                        .start()
-                }
-                .start()
-        }
+//        soundCapsulePlaceholder.addView(aprilCapsule)
+//        soundCapsulePlaceholder.addView(marchCapsule)
     }
 
     private fun loadStats() {
@@ -250,7 +235,7 @@ class ProfileFragment : Fragment() {
         // Logout button
         binding.btnLogout.setOnClickListener {
             // Handle logout
-            profileViewModel.logout()
+            profileViewModel.logout(requireActivity() as MainActivity)
             Toast.makeText(requireContext(), "Logged out successfully", Toast.LENGTH_SHORT).show()
 
             // Navigate back to LoginActivity

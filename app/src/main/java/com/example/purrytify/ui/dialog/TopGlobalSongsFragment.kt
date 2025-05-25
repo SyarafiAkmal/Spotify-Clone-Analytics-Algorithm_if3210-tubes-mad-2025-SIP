@@ -232,7 +232,7 @@ class TopGlobalSongsFragment : BottomSheetDialogFragment() {
 
                 // Play the song
                 (requireActivity() as MainActivity).musicPlayerManager.loadSong(requireContext(), song)
-                (requireActivity() as MainActivity).musicPlayerManager.play()
+//                (requireActivity() as MainActivity).musicPlayerManager.play()
             }
 
             // Add the complete row to the container

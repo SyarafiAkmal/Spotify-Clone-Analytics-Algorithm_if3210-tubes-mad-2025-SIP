@@ -6,8 +6,11 @@ import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.data.local.db.entities.SongUploader
 import androidx.room.Room
 import android.content.Context
+import com.example.purrytify.data.local.db.entities.CapsuleEntity
+import com.example.purrytify.data.local.db.entities.SongActivity
+import com.example.purrytify.data.local.db.entities.UserActivity
 
-@Database(entities = [SongEntity::class, SongUploader::class], version = 24)
+@Database(entities = [SongEntity::class, SongUploader::class, CapsuleEntity::class, UserActivity::class, SongActivity::class], version = 34)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
 

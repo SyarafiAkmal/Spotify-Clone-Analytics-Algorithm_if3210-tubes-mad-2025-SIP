@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import com.example.purrytify.data.local.db.entities.SongEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +19,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlin.getValue
 
 class MusicPlayerManager private constructor() {
     private var mediaPlayer: MediaPlayer? = null
@@ -42,6 +44,12 @@ class MusicPlayerManager private constructor() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var updateProgressTask: Runnable
 
+    private val _startPos = MutableStateFlow(0)
+    val startPos: StateFlow<Int> = _startPos
+
+    private val _timeListened = MutableStateFlow(0)
+    val timeListened: StateFlow<Int> = _timeListened
+
     init {
         updateProgressTask = Runnable {
             mediaPlayer?.let {
@@ -53,6 +61,10 @@ class MusicPlayerManager private constructor() {
 
     fun loadQueue() {
 //        _songQueue.
+    }
+
+    fun resetTimeListened() {
+        _timeListened.value = 0
     }
 
     fun loadSong(context: Context, song: SongEntity) {
@@ -68,6 +80,12 @@ class MusicPlayerManager private constructor() {
                     }
                     if (musicDB.isSongExistForUser(song)) {
                         context.updateRecentlyPlayedInHome(song)
+                        musicDB.addTimesPlayed(song.id)
+                        if(!musicDB.isUserSongActivityExist(currentSongInfo.value!!)) {
+                            musicDB.registerSongActivity(song.id, DateTimeUtils.getCurrentTimeIso())
+                        }
+                        Toast.makeText(context, "played songId: ${song.id} ${musicDB.getSongUploader(song.id).timesPlayed} times",
+                            Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -84,8 +102,10 @@ class MusicPlayerManager private constructor() {
                 _currentSongInfo.value = song
 
                 newPlayer.setOnCompletionListener {
+                    _timeListened.value += currentPosition.value - _startPos.value
                     _isPlaying.value = false
                     _currentPosition.value = 0
+                    _startPos.value = currentPosition.value
                     stopProgressTracking()
                 }
 
@@ -113,6 +133,8 @@ class MusicPlayerManager private constructor() {
         mediaPlayer?.let {
             if (_isPlaying.value && it.isPlaying) {
                 it.pause()
+                _timeListened.value += currentPosition.value - _startPos.value
+                _startPos.value = currentPosition.value
                 _isPlaying.value = false
                 stopProgressTracking()
             }

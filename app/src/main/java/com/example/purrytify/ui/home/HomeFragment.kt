@@ -140,7 +140,7 @@ class HomeFragment : Fragment() {
 
                 Toast.makeText(requireActivity(), "id: ${albumView.getSong()?.id}", Toast.LENGTH_SHORT).show()
                 (requireActivity() as MainActivity).musicPlayerManager.loadSong(requireContext(), albumView.getSong()!!)
-                (requireActivity() as MainActivity).musicPlayerManager.play()
+//                (requireActivity() as MainActivity).musicPlayerManager.play()
             }
 
             newSongsPlaceholder.addView(albumView)
@@ -193,7 +193,7 @@ class HomeFragment : Fragment() {
 
                 Toast.makeText(requireContext(), "id:${song.id}", Toast.LENGTH_SHORT).show()
                 (requireActivity() as MainActivity).musicPlayerManager.loadSong(requireContext(), libraryView.getSong()!!)
-                (requireActivity() as MainActivity).musicPlayerManager.play()
+//                (requireActivity() as MainActivity).musicPlayerManager.play()
             }
 
             recentlyPlayedPlaceholder.addView(libraryView)

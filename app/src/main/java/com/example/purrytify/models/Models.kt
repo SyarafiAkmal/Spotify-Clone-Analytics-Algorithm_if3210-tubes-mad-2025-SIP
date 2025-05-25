@@ -1,5 +1,6 @@
 package com.example.purrytify.models
 
+import com.example.purrytify.data.local.db.entities.SongEntity
 import okhttp3.MultipartBody
 
 data class Profile (
@@ -56,4 +57,16 @@ data class OnlineSong (
     val rank: String,
     val createdAt: String,
     val updatedAt: String
+)
+
+data class SongStreak (
+    val songId: Int,
+    val frequency: Int,
+    val dateInterval: String? = ""
+)
+
+data class FormattedSongStreak (
+    val song: SongEntity,
+    val frequency: Int,
+    val dateInterval: String? = ""
 )

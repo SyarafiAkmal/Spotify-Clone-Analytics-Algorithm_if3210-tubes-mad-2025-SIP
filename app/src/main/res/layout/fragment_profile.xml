@@ -66,6 +66,8 @@
                     android:layout_width="120dp"
                     android:layout_height="120dp"
                     android:padding="2dp"
+                    android:background="@drawable/circle_shape"
+                    android:clipToOutline="true"
                     android:scaleType="centerCrop"
                     app:layout_constraintBottom_toTopOf="@id/profileName"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -222,38 +224,40 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/capsuleHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="18dp"
+                android:paddingVertical="25dp"
+                app:layout_constraintTop_toBottomOf="@+id/guideline">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Your Sound Capsule"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/capsuleDownload"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginTop="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/download_capsule" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/soundCapsule"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@+id/guideline">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="18dp"
-                    android:paddingVertical="25dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Your Sound Capsule"
-                        android:textColor="#FFFFFF"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-
-                    <ImageButton
-                        android:id="@+id/capsuleDownload"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginTop="4dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:scaleType="fitXY"
-                        android:src="@drawable/download_capsule" />
-
-                </LinearLayout>
+                app:layout_constraintTop_toBottomOf="@+id/capsuleHeader">
 
                 <!-- Capsule Stats Component -->
             </LinearLayout>

@@ -3,14 +3,12 @@ package com.example.purrytify.ui.profile
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.purrytify.databinding.EditProfileBinding
@@ -23,7 +21,6 @@ import com.example.purrytify.models.EditProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Response
 
 class EditProfileFragment : DialogFragment() {
 
@@ -37,7 +34,6 @@ class EditProfileFragment : DialogFragment() {
         _binding = EditProfileBinding.inflate(inflater, container, false)
         profileViewModel = ViewModelProvider(requireActivity()).get(ProfileViewModel::class.java)
         val countries = resources.getStringArray(R.array.countries)
-
 
         val arrayAdapter = ArrayAdapter(
             requireContext(),

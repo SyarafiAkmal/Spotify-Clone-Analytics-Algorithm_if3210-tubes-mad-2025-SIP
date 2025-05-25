@@ -778,7 +778,7 @@ class LibraryFragment : Fragment() {
                     .start()
 
                 (requireActivity() as MainActivity).musicPlayerManager.loadSong(requireContext(), libraryView.getSong()!!)
-                (requireActivity() as MainActivity).musicPlayerManager.play()
+//                (requireActivity() as MainActivity).musicPlayerManager.play()
             }
 
             librarySongsPlaceholder.addView(libraryView)
