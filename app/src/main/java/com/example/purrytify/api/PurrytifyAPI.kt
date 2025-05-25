@@ -16,6 +16,10 @@ import retrofit2.http.Header
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.http.Multipart
+import retrofit2.http.Part
 
 interface PurrytifyAPI {
 
@@ -47,10 +51,12 @@ interface PurrytifyAPI {
     @POST("api/refresh-token")
     suspend fun refreshToken(@Body refreshToken: RefreshToken): Token
 
+    @Multipart
     @PATCH("api/profile")
     suspend fun editProfile(
-        @Body editProfile: EditProfile,
-        @Header ("Authorization") token: String
+        @Part("location") location: RequestBody,
+        @Part profilePhoto: MultipartBody.Part?,
+        @Header("Authorization") token: String
     ): Response<Message>
 
     @GET("/api/songs/{id}")

@@ -24,8 +24,8 @@ Kini, misi besar dimulai. Mampukah kamu, sebagai agen rahasia O.W.C.A., membantu
 
 ## 💻 Developers
 
-| Name                                                                 | Features                      | Exploration hours | Working Hours |
-| -------------------------------------------------------------------- | ----------------------------- | ----------------- | ------------- |
-| [Ibrahim Ihsan Rasyid - 13522018](https://github.com/ibrahim-rasyid) |Network sensing, Profile Fragment|6                   |20               |
-| [Amalia Putri - 13522042](https://github.com/amaliap21)              | Loading, Login, Home, Profile | 5                 | 20            |
-| [Muhammad Syarafi Akmal - 13522076](https://github.com/SyarafiAkmal) |Almost all of the features                               |10                   |35               |
+| Name                                                                 | Features                                                                                                                    | Exploration hours | Working Hours |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------- | ------------- |
+| [Ibrahim Ihsan Rasyid - 13522018](https://github.com/ibrahim-rasyid) | Network sensing, Profile Fragment                                                                                           | 6                 | 20            |
+| [Amalia Putri - 13522042](https://github.com/amaliap21)              | Loading, Login, Home, Profile, Time Listened, Top Artists, Top Songs, Share Day Streak, Share Sound Capsule, Responsiveness, edit profile | 10                 | 35            |
+| [Muhammad Syarafi Akmal - 13522076](https://github.com/SyarafiAkmal) | Almost all of the features                                                                                                  | 10                | 35            |
