@@ -247,7 +247,7 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
     fun checkAndInsertSong(song: SongEntity) {
         viewModelScope.launch {
             try {
-                val existsForUser = songDao.isSongExistsForUser(song.title, song.artist, userEmail!!)
+                val existsForUser = songDao.isSongExistsForUser(song.title, song.artist, song.id, userEmail!!)
                 val exists = songDao.isSongExists(song.title, song.artist)
 
                 if (existsForUser) {
@@ -297,7 +297,7 @@ class MusicDbViewModel(application: Application) : AndroidViewModel(application)
     }
 
     suspend fun isSongExistForUser(song: SongEntity): Boolean {
-        return songDao.isSongExistsForUser(song.title, song.artist, userEmail!!)
+        return songDao.isSongExistsForUser(song.title, song.artist, song.id, userEmail!!)
     }
 
 }

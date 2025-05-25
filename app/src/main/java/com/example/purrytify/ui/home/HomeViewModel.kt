@@ -25,6 +25,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val userAllSongs: StateFlow<List<SongEntity>> = _userAllSongs.asStateFlow()
     private val musicDbViewModel = MusicDbViewModel(application)
     private var packageName: String = "com.example.purrytify"
+    private val _userLikedSongs = MutableStateFlow<List<SongEntity>>(emptyList())
+    val userLikedSongs: StateFlow<List<SongEntity>> = _userLikedSongs.asStateFlow()
 
     fun setPackageName(pkgName: String) {
         packageName = pkgName
@@ -47,6 +49,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 launch {
                     musicDbViewModel.allSongs.take(1).collect { songs ->
                         _userAllSongs.value = songs.take(10)
+//                        Log.d("HomeViewModel", "Home All songs: ${songs.size}")
+                    }
+                }
+
+                launch {
+                    musicDbViewModel.likedSongs.take(1).collect { songs ->
+                        _userLikedSongs.value = songs.take(10)
+
 //                        Log.d("HomeViewModel", "Home All songs: ${songs.size}")
                     }
                 }

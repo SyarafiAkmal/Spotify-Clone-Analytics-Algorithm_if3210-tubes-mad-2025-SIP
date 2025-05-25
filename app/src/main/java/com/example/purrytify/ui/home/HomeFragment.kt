@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.MainActivity
 import com.example.purrytify.R
+import com.example.purrytify.api.ApiClient
 import com.example.purrytify.data.local.db.entities.SongEntity
 import com.example.purrytify.databinding.FragmentHomeBinding
 import com.example.purrytify.ui.global.TopGlobalSongsFragment
@@ -26,7 +27,9 @@ import com.example.purrytify.ui.global.TopLocalSongsFragment
 import com.example.purrytify.utils.ImageUtils
 import com.example.purrytify.views.AlbumItemView
 import com.example.purrytify.views.LibraryItemView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeFragment : Fragment() {
 
@@ -79,6 +82,71 @@ class HomeFragment : Fragment() {
         val topLocalSongs: LinearLayout = binding.topLocalSongs
         val topGlobalSongs: LinearLayout = binding.topGlobalSongs
         val prefs: SharedPreferences = requireActivity().getSharedPreferences("app_prefs", MODE_PRIVATE)
+        binding.tvRecSongs.visibility = View.GONE
+        binding.hsvRecSongs.visibility = View.GONE
+        binding.recSongsPlaceholder.visibility = View.GONE
+
+        lifecycleScope.launch {
+            homeViewModel.userLikedSongs.collect { songs ->
+                if (songs.size !== 0) {
+                    binding.tvRecSongs.visibility = View.VISIBLE
+                    binding.hsvRecSongs.visibility = View.VISIBLE
+                    binding.recSongsPlaceholder.visibility = View.VISIBLE
+
+                    val serverSongs: MutableList<SongEntity> = mutableListOf()
+
+                    val onlineLocalSongs = withContext(Dispatchers.IO) {
+                        ApiClient.api.getLocalSongs(prefs.getString("country_code", "")!!)
+                    }
+
+                    val onlineGlobalSongs = withContext(Dispatchers.IO) {
+                        ApiClient.api.getGlobalSongs()
+                    }
+
+                    serverSongs.addAll(onlineGlobalSongs.map { onlineSong ->
+                        SongEntity(
+                            id = onlineSong.id,
+                            title = onlineSong.title,
+                            artist = onlineSong.artist,
+                            artworkURI = onlineSong.artwork,
+                            uri = onlineSong.url,
+                            duration = 0
+                        )
+                    })
+
+                    serverSongs.addAll(onlineLocalSongs.map { onlineSong ->
+                        SongEntity(
+                            id = onlineSong.id,
+                            title = onlineSong.title,
+                            artist = onlineSong.artist,
+                            artworkURI = onlineSong.artwork,
+                            uri = onlineSong.url,
+                            duration = 0
+                        )
+                    })
+
+                    val likedArtist: List<String> = songs.map { it.artist }
+
+                    val recSongs: MutableList<SongEntity> = mutableListOf()
+
+                    val userSongIds = homeViewModel.userAllSongs.value.map { it.id }.toSet()
+
+                    recSongs.addAll(
+                        serverSongs
+                            .filter { song ->
+                                song.id !in userSongIds &&
+                                        likedArtist.any { liked -> song.artist.contains(liked, ignoreCase = true) }
+                            }
+                            .distinctBy { it.id }.distinctBy { it.title }
+                    )
+
+
+                    if (recSongs.isNotEmpty()) {
+                        injectRecSongs(recSongs)
+                    }
+                }
+            }
+        }
 
         topLocalSongs.setOnClickListener {
             TopLocalSongsFragment().show(parentFragmentManager, "local_songs_dialog")
@@ -90,6 +158,54 @@ class HomeFragment : Fragment() {
 //            Toast.makeText(requireContext(), "There is ${homeViewModel.onlineGlobalSongs.size} top global songs", Toast.LENGTH_SHORT).show()
         }
 
+    }
+
+    private fun injectRecSongs(songs: List<SongEntity>) {
+        val recSongsPlaceholder: LinearLayout = binding.recSongsPlaceholder
+        recSongsPlaceholder.removeAllViews()
+
+        songs.forEach { song ->
+            val albumView = AlbumItemView(requireContext()).apply {
+                // Get access to the ImageView for direct bitmap setting if needed
+                val albumImageView = this.findViewById<android.widget.ImageView>(R.id.album_image)
+
+                // Set the resource ID (will be used if it's a drawable resource)
+                // For file paths, the ImageView is already updated by the utility
+//                setAlbumImage(resId)
+                setTitle(song.title)
+                setArtist(song.artist)
+                setSong(song)
+                ImageUtils.loadImage(requireContext(), song.artworkURI, albumImageView)
+
+                val params = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                params.marginEnd = resources.getDimensionPixelSize(R.dimen.album_item_margin)
+                layoutParams = params
+            }
+
+            albumView.setOnClickListener {
+                albumView.animate()
+                    .scaleX(0.95f)
+                    .scaleY(0.95f)
+                    .setDuration(100)
+                    .withEndAction {
+                        albumView.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(100)
+                            .start()
+                    }
+                    .start()
+
+                Toast.makeText(requireActivity(), "id: ${albumView.getSong()?.id}", Toast.LENGTH_SHORT).show()
+                (requireActivity() as MainActivity).musicPlayerManager.loadSong(requireContext(), albumView.getSong()!!)
+//                (requireActivity() as MainActivity).musicPlayerManager.play()
+            }
+
+            recSongsPlaceholder.addView(albumView)
+        }
     }
 
     private fun injectNewSongs(songs: List<SongEntity>) {

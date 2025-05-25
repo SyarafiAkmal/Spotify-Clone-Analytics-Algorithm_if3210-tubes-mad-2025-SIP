@@ -18,9 +18,9 @@ interface SongDao {
     // SONG ENTITY
     @Query("""
         SELECT EXISTS(SELECT 1 FROM song_entity AS s JOIN song_uploader AS su 
-        WHERE s.title = :title AND s.artist = :artist AND su.uploaderEmail = :userEmail AND s.id = su.songId)
+        WHERE s.title = :title AND s.artist = :artist AND su.uploaderEmail = :userEmail AND s.id = su.songId AND s.id = :songId)
     """)
-    suspend fun isSongExistsForUser(title: String, artist: String, userEmail: String): Boolean
+    suspend fun isSongExistsForUser(title: String, artist: String, songId: Int, userEmail: String): Boolean
 
     @Query("""
         SELECT EXISTS(SELECT 1 FROM song_entity 

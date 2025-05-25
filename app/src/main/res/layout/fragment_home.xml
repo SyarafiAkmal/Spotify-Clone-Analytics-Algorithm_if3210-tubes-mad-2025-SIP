@@ -211,6 +211,49 @@
                 </LinearLayout>
             </HorizontalScrollView>
 
+            <TextView
+                android:id="@+id/tvRecSongs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="32dp"
+                android:text="Based On Your Likes"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/hsvNewSongs" />
+
+            <!-- New Songs Horizontal Scroll -->
+            <HorizontalScrollView
+                android:id="@+id/hsvRecSongs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:scrollbars="none"
+                app:layout_constraintTop_toBottomOf="@+id/tvRecSongs">
+
+                <LinearLayout
+                    android:id="@+id/recSongsPlaceholder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp">
+
+                    <!-- Starboy -->
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:id="@+id/emptyRecSongsPlaceholder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="165dp"
+                        android:padding="10dp"
+                        android:gravity="center">
+
+                    </LinearLayout>
+                </LinearLayout>
+            </HorizontalScrollView>
+
             <!-- Recently Played Section -->
             <TextView
                 android:id="@+id/tvRecentlyPlayed"
@@ -223,7 +266,7 @@
                 android:textSize="22sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/hsvNewSongs" />
+                app:layout_constraintTop_toBottomOf="@+id/hsvRecSongs" />
 
             <!-- Recently Played List -->
             <LinearLayout
