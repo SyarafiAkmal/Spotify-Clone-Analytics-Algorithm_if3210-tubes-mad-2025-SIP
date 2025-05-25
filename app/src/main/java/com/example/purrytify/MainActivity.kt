@@ -159,7 +159,7 @@ class MainActivity : AppCompatActivity() {
             val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
 
             // Seed
-            musicDBViewModel.registerSongActivity(2, "2025-05-26T12:00:00Z")
+//            musicDBViewModel.registerSongActivity(2, "2025-05-26T12:00:00Z")
 
             musicPlayerManager.loadQueue()
             musicPlayerManager.clearCurrentSong()
