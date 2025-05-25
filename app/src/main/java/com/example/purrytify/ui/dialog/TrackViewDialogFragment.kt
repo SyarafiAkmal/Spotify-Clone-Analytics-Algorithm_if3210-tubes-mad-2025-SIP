@@ -249,7 +249,7 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
             if (musicPlayerManager.isPlaying.value) {
                 musicPlayerManager.pause()
             } else {
-                musicPlayerManager.play()
+                musicPlayerManager.play(requireContext())
             }
         }
 

@@ -107,7 +107,7 @@ class MusicPlayerManager private constructor() {
                     stopProgressTracking()
                 }
 
-                play()
+                play(context)
             } else {
                 println("Error: Could not create MediaPlayer for URI: ${song.uri}")
             }
@@ -117,12 +117,13 @@ class MusicPlayerManager private constructor() {
         }
     }
 
-    fun play() {
+    fun play(context: Context) {
         mediaPlayer?.let {
             if (!_isPlaying.value) {
                 it.start()
                 _isPlaying.value = true
                 startProgressTracking()
+                sendMusicAction(context, "ACTION_PLAY")
             }
         }
     }

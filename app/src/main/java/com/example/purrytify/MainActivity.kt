@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity() {
             if (musicPlayerManager.isPlaying.value) {
                 musicPlayerManager.pause()
             } else {
-                musicPlayerManager.play()
+                musicPlayerManager.play(this)
             }
         }
 

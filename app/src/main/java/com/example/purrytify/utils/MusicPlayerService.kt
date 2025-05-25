@@ -9,13 +9,19 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import com.example.purrytify.MainActivity
 import com.example.purrytify.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class MusicPlayerService : Service() {
 
     private lateinit var mediaSession: MediaSessionCompat
-    private lateinit var mediaPlayer: MediaPlayer
     private val CHANNEL_ID = "music_channel"
     private lateinit var musicPlayerManager: MusicPlayerManager
+    private val serviceJob = Job()
+    private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
     override fun onCreate() {
         super.onCreate()
@@ -23,6 +29,14 @@ class MusicPlayerService : Service() {
 
         mediaSession = MediaSessionCompat(this, "MusicService")
         createNotificationChannel()
+
+        serviceScope.launch {
+            musicPlayerManager.currentSongInfo.collectLatest { song ->
+                if (song != null && musicPlayerManager.isPlaying.value) {
+                    showNotification(true)
+                }
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -30,15 +44,21 @@ class MusicPlayerService : Service() {
         when (action) {
             "ACTION_PLAY" -> playMusic()
             "ACTION_PAUSE" -> pauseMusic()
-            "ACTION_STOP" -> stopSelf()
+            "ACTION_STOP" -> stopMusic()
         }
 
         return START_NOT_STICKY
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        musicPlayerManager.pause()
+        stopMusic()
+    }
+
     private fun playMusic() {
         // inisialisasi dan mulai pemutaran
-        musicPlayerManager.play()
+        musicPlayerManager.play(this)
         showNotification(isPlaying = true)
     }
 
@@ -46,6 +66,11 @@ class MusicPlayerService : Service() {
         // pause media
         musicPlayerManager.pause()
         showNotification(isPlaying = false)
+    }
+
+    private fun stopMusic() {
+        musicPlayerManager.pause()
+        stopSelf()
     }
 
     private fun showNotification(isPlaying: Boolean) {
@@ -106,4 +131,9 @@ class MusicPlayerService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceJob.cancel()
+    }
 }
