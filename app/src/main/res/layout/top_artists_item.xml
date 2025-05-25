@@ -49,9 +49,4 @@
             android:src="@drawable/the_beatles" />
     </LinearLayout>
 
-    <!-- Bottom Border -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#535353" />
 </LinearLayout>
