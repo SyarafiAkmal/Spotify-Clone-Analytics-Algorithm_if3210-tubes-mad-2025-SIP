@@ -126,7 +126,6 @@ class CapsuleStatsView @JvmOverloads constructor(
     }
 
     fun setMinutes() {
-        Toast.makeText(context, "${capsuleData.value?.minuteListened}", Toast.LENGTH_SHORT).show()
         minutesTextView.text = "${capsuleData.value?.minuteListened} minutes"
     }
 

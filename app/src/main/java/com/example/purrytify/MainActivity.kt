@@ -1,10 +1,7 @@
 package com.example.purrytify
 
-import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,9 +17,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.example.purrytify.databinding.ActivityMainBinding
 import com.example.purrytify.utils.MusicPlayerManager
 import android.util.Log
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import com.example.purrytify.api.ApiClient
 import com.example.purrytify.models.Login
@@ -36,9 +30,11 @@ import com.example.purrytify.ui.home.HomeViewModel
 import com.example.purrytify.ui.library.LibraryViewModel
 import com.example.purrytify.ui.profile.ProfileViewModel
 import com.example.purrytify.ui.trackview.TrackViewDialogFragment
+import com.example.purrytify.utils.DateTimeUtils
 import com.example.purrytify.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.OffsetDateTime
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
@@ -52,19 +48,9 @@ class MainActivity : AppCompatActivity() {
     val userLibrary = MutableStateFlow<List<SongEntity>>(emptyList())
     private val handler = Handler(Looper.getMainLooper())
     private val checkInterval = TimeUnit.MINUTES.toMillis(3)
-    private val qrScanLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
-        }
-    }
-    companion object {
-        const val QR_SCAN_REQUEST_CODE = 1001
-    }
-    private val CAMERA_PERMISSION_REQUEST_CODE = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        handleDeepLink(intent)
 
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         val isLoggedIn = prefs.getBoolean("is_logged_in", false)
@@ -76,14 +62,46 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        // heartbeat
+        handler.post(heartBeat)
 
+        // Register User Activity (if not exist)
+        registerUserActivity()
+
+        // For periodic token management
         handler.post(periodicChecker)
+
+        // Load init data if there's any
         loadInitialData()
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setupLibraryObservation()
+        setContentView(binding.root)
         setupNavigationAndListeners()
         setupMusicPlayer()
+    }
+
+    private fun registerUserActivity() {
+        lifecycleScope.launch {
+            if (!musicDBViewModel.isUserActivityExist()) {
+                musicDBViewModel.registerUserActivity()
+            }
+        }
+    }
+
+    private val heartBeat = object : Runnable {
+        override fun run() {
+            lifecycleScope.launch {
+                musicPlayerManager.timeListened.collect { time ->
+                    if(!musicPlayerManager.isPlaying.value) {
+                        musicDBViewModel.updateTimeListened(time)
+                        musicPlayerManager.resetTimeListened()
+                    }
+//                    Toast.makeText(this@MainActivity, "Time Listened ${musicDBViewModel.getUserActivity().timeListened}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            handler.postDelayed(this, 3000)
+        }
     }
 
     private val periodicChecker = object : Runnable {
@@ -125,6 +143,9 @@ class MainActivity : AppCompatActivity() {
     private fun loadInitialData() {
         lifecycleScope.launch {
             val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+
+            // Seed
+            musicDBViewModel.registerSongActivity(2, "2025-05-26T12:00:00Z")
 
             musicPlayerManager.loadQueue()
             musicPlayerManager.clearCurrentSong()
@@ -213,14 +234,19 @@ class MainActivity : AppCompatActivity() {
             TrackViewDialogFragment().show(supportFragmentManager, "track_view_dialog")
         }
 
-        binding.btnScanQr.setOnClickListener {
-            checkCameraPermissionAndOpenScanner()
-        }
-
         val navView: BottomNavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
+                R.id.navigation_home -> {
+                    binding.btnScanQr.visibility = View.VISIBLE
+                }
+                R.id.navigation_library -> {
+                    binding.btnScanQr.visibility = View.GONE
+                }
+                R.id.navigation_profile -> {
+                    binding.btnScanQr.visibility = View.GONE
+                }
                 R.id.navigation_home,
                 R.id.navigation_library -> {
                     if(musicPlayerManager.currentSongInfo.value !== null){
@@ -283,51 +309,4 @@ class MainActivity : AppCompatActivity() {
         handler.removeCallbacks(periodicChecker)
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        handleDeepLink(intent)
-    }
-
-    private fun handleDeepLink(intent: Intent?) {
-        val data = intent?.data
-        if (data != null && data.scheme == "purrytify" && data.host == "song") {
-            val songId = data.lastPathSegment?.toIntOrNull()
-            if (songId != null) {
-                // Navigate to the player or load the song using songId
-                openTrackViewDialog(songId)
-            } else {
-                Toast.makeText(this@MainActivity, "Invalid song ID", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun openTrackViewDialog(songId: Int) {
-        val fragment = TrackViewDialogFragment()
-
-        // Optional: set songId as argument to the fragment if needed
-        val bundle = Bundle().apply { putInt("song_id", songId) }
-        fragment.arguments = bundle
-
-        fragment.show(supportFragmentManager, "trackView")
-    }
-
-    private fun checkCameraPermissionAndOpenScanner() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED) {
-            // Permission not granted, request it
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.CAMERA),
-                CAMERA_PERMISSION_REQUEST_CODE
-            )
-        } else {
-            // Permission already granted, open scanner
-            openQRScanner()
-        }
-    }
-
-    private fun openQRScanner() {
-        val intent = Intent(this, QRScannerActivity::class.java)
-        qrScanLauncher.launch(intent)
-    }
 }
