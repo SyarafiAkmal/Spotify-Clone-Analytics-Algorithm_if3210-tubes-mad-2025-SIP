@@ -10,7 +10,7 @@ import com.example.purrytify.data.local.db.entities.CapsuleEntity
 import com.example.purrytify.data.local.db.entities.SongActivity
 import com.example.purrytify.data.local.db.entities.UserActivity
 
-@Database(entities = [SongEntity::class, SongUploader::class, CapsuleEntity::class, UserActivity::class, SongActivity::class], version = 34)
+@Database(entities = [SongEntity::class, SongUploader::class, CapsuleEntity::class, UserActivity::class, SongActivity::class], version = 35)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun songDao(): SongDao
 
