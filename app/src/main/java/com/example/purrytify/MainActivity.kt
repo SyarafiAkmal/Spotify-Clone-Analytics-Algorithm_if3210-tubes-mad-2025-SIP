@@ -267,15 +267,13 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_profile -> {
                     binding.btnScanQr.visibility = View.GONE
+                    toggleMiniPlayer(false)
                 }
                 R.id.navigation_home,
                 R.id.navigation_library -> {
                     if(musicPlayerManager.currentSongInfo.value !== null){
                         toggleMiniPlayer(true)
                     }
-                }
-                R.id.navigation_profile -> {
-                    toggleMiniPlayer(false)
                 }
             }
         }
