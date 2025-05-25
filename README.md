@@ -21,6 +21,7 @@ Kini, misi besar dimulai. Mampukah kamu, sebagai agen rahasia O.W.C.A., membantu
 | Upload       | <img src="https://github.com/user-attachments/assets/7545a02a-48b7-4efa-9482-14f3eb8cb5af" width="200"/> |
 | Global Songs | <img src="https://github.com/user-attachments/assets/6bcd31a9-5468-4895-9d03-4856bc3bf75a" width="200"/> |
 | Local Songs  | <img src="https://github.com/user-attachments/assets/d922354c-c4a4-42f9-80e7-3171bd6228a7" width="200"/> |
+| Share Via URL/QR | <img src="https://github.com/user-attachments/assets/e160c891-8b5e-442c-8fa5-377dc7fa725a" width="200"/> | 
 
 
 ## 🕹️ Library
