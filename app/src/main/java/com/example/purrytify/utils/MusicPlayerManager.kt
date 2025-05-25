@@ -1,11 +1,12 @@
 package com.example.purrytify.utils
 
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.activity.viewModels
 import com.example.purrytify.data.local.db.entities.SongEntity
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,9 +16,6 @@ import androidx.lifecycle.lifecycleScope
 import com.example.purrytify.MainActivity
 import com.example.purrytify.models.OnlineSong
 import com.example.purrytify.views.MusicDbViewModel
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
@@ -195,5 +193,12 @@ class MusicPlayerManager private constructor() {
         } catch (e: Exception) {
             0L
         }
+    }
+
+    fun sendMusicAction(context: Context, action: String) {
+        val intent = Intent(context, MusicPlayerService::class.java).apply {
+            this.action = action
+        }
+        ContextCompat.startForegroundService(context, intent)
     }
 }

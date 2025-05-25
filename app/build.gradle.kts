@@ -52,6 +52,7 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
     implementation("androidx.activity:activity:1.8.2")
+    implementation("androidx.media:media:1.6.0")
     implementation(libs.androidx.lifecycle.viewmodel.android)  // Downgraded from 1.10.1
 
     testImplementation(libs.junit)
