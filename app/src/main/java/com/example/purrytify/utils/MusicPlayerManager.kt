@@ -82,8 +82,8 @@ class MusicPlayerManager private constructor() {
                         if(!musicDB.isUserSongActivityExist(currentSongInfo.value!!)) {
                             musicDB.registerSongActivity(song.id, DateTimeUtils.getCurrentTimeIso())
                         }
-                        Toast.makeText(context, "played songId: ${song.id} ${musicDB.getSongUploader(song.id).timesPlayed} times",
-                            Toast.LENGTH_SHORT).show()
+//                        Toast.makeText(context, "played songId: ${song.id} ${musicDB.getSongUploader(song.id).timesPlayed} times",
+//                            Toast.LENGTH_SHORT).show()
                     }
                 }
             }

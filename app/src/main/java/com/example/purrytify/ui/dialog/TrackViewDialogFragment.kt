@@ -27,6 +27,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -89,6 +90,7 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
         }
 
         setupUI()
+        loadSongs()
         setupButtons()
         observeMusicState()
         setupSeekBar()
@@ -254,6 +256,7 @@ class TrackViewDialogFragment : BottomSheetDialogFragment() {
         }
 
         binding.btnPrevious.setOnClickListener {
+//            Toast.makeText(requireContext(), "${allSongs.value.size}", Toast.LENGTH_SHORT).show()
             val songId = musicPlayerManager.currentSongId.value - 1
             val newSongId = if (songId - 1 < 0) 0 else songId - 1
             if (allSongs.value.isNotEmpty() && newSongId < allSongs.value.size) {

@@ -125,7 +125,7 @@ class HomeFragment : Fragment() {
                         )
                     })
 
-                    val likedArtist: List<String> = songs.map { it.artist }
+                    val likedArtist: List<String> = songs.map { it.artist.split(", ").get(0) }
 
                     val recSongs: MutableList<SongEntity> = mutableListOf()
 
